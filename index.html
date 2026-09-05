@@ -49,6 +49,7 @@
   .legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
   .sw.s1 i{background:var(--uk)} .sw.s2 i{background:#9db4e6} .sw.s3 i{background:#fff;border:1.5px solid var(--uk)} .sw.sr i{background:#c7ced9}
   .sw.tr i{background:#fde9e0;border:1px solid #f6d2ba} .sw.ac i{background:#e2f2e8;border:1px solid #bfe3cd} .sw.st i{background:#fff6da;border:1px solid #f0dd9c}
+  .sw.ret2 i{background:#eaf0fb;border:1px solid #cdddf7} .sw.trn i{background:#fde7dd;border:1px solid #f6ccae} .sw.frn i{background:#efe7fb;border:1px solid #ddccf5}
 
   main{max-width:1180px;margin:0 auto;padding:18px 14px 60px}
   .group{margin-top:26px}
@@ -68,6 +69,11 @@
   .dbadge.d2{background:#e7edfa;color:#274b9e}
   .dbadge.d3{background:#fff;color:var(--muted);border:1px solid var(--line)}
   .dbadge.dr{background:#eef1f5;color:#8b95a3;border:1px solid var(--line)}
+  .sB{font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 7px;white-space:nowrap;letter-spacing:.2px}
+  .sB.ret{background:#eaf0fb;color:#1c3f8f;border:1px solid #cdddf7}
+  .sB.tr2{background:#fde7dd;color:#b5490f;border:1px solid #f6ccae}
+  .sB.fr2{background:#efe7fb;color:#5a2b9a;border:1px solid #ddccf5}
+  .statussel{border:1px solid var(--line);border-radius:9px;background:#fff;padding:8px 10px;font-size:13.5px;font-family:var(--sans);color:var(--ink);font-weight:500}
   .name{font-weight:700;font-size:15.5px;letter-spacing:-.1px;line-height:1.15;margin-top:5px}
   .meta{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5}
   .meta .sep{color:var(--line)}
@@ -112,17 +118,22 @@
         <button id="sDepth" data-on="1">Depth order</button>
         <button id="sNum" data-on="0">By #</button>
       </div>
-      <label class="toggle"><input type="checkbox" id="trOnly"> Transfers</label>
+      <select id="statusSel" class="statussel" aria-label="Filter by roster status">
+        <option value="ALL">All players</option>
+        <option value="R">Returning (2025)</option>
+        <option value="NEW">New in 2026</option>
+        <option value="T">&nbsp;&nbsp;— Transfers</option>
+        <option value="F">&nbsp;&nbsp;— Freshmen</option>
+      </select>
       <span class="count" id="count"></span>
     </div>
     <div class="chips" id="chips"></div>
     <div class="legend">
+      <span class="sw ret2"><i></i>Returner ’25</span>
+      <span class="sw trn"><i></i>New: transfer</span>
+      <span class="sw frn"><i></i>New: freshman</span>
       <span class="sw s1"><i></i>Starter</span>
-      <span class="sw s2"><i></i>2nd</span>
-      <span class="sw s3"><i></i>3rd</span>
-      <span class="sw sr"><i></i>Reserve</span>
       <span class="sw st"><i></i>★ HS stars</span>
-      <span class="sw tr"><i></i>Transfer</span>
       <span class="sw ac"><i></i>Accolade</span>
     </div>
   </div>
@@ -135,6 +146,7 @@
   Depth order = projected two-deep/three-deep from public sources (updated Sep 2, 2026); game-day order can shift.
   Roster data from the official UK Athletics roster. Slot labels use Kentucky’s 3-4/nickel scheme (JACK = edge; NB = nickel).
   ★ = verified high-school star rating; green = notable accolade where available.
+  Returner = on Kentucky’s 2025 roster; New = joined in 2026 via the portal (transfer) or as a freshman. A few redshirt freshmen who were on the 2025 team are counted as returners.
 </footer>
 
 <script>
@@ -264,7 +276,14 @@ const R=[
 ["97","Tyler Thomas","DL","DE","6-5","260","SR","Mobile, AL","Cottage Hill Christian","South Alabama / UAB",0,"DE",3,""],
 ];
 
-let activeGroup="ALL", trOnly=false, query="", sortMode="depth";
+let activeGroup="ALL", statusFilter="ALL", query="", sortMode="depth";
+// redshirt freshmen who were on the 2025 roster → count as returners, not new
+const RS_FR_RETURNERS=new Set(["Mikkel Skinner","Jay Clark","Jermiel Atkins Jr."]);
+function statusOf(p){
+  if(p[13]) return "T";                                        // has previous college → transfer
+  if(p[6]==="FR" && !RS_FR_RETURNERS.has(p[1])) return "F";    // true freshman → new
+  return "R";                                                  // otherwise → returner
+}
 
 const chipsEl=document.getElementById("chips");
 function mkChip(k,label){
@@ -279,7 +298,7 @@ chipsEl.appendChild(mkChip("ALL","All"));
 GROUPS.forEach(g=>chipsEl.appendChild(mkChip(g.k,g.k)));
 
 document.getElementById("q").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();render();});
-document.getElementById("trOnly").addEventListener("change",e=>{trOnly=e.target.checked;render();});
+document.getElementById("statusSel").addEventListener("change",e=>{statusFilter=e.target.value;render();});
 const sD=document.getElementById("sDepth"),sN=document.getElementById("sNum");
 sD.onclick=()=>{sortMode="depth";sD.dataset.on="1";sN.dataset.on="0";render();};
 sN.onclick=()=>{sortMode="num";sN.dataset.on="1";sD.dataset.on="0";render();};
@@ -289,7 +308,13 @@ const F={num:0,name:1,group:2,pos:3,ht:4,wt:5,cls:6,home:7,hs:8,prev:9,stars:10,
 
 function matches(p){
   if(activeGroup!=="ALL" && p[F.group]!==activeGroup) return false;
-  if(trOnly && !p[F.prev]) return false;
+  if(statusFilter!=="ALL"){
+    const st=statusOf(p);
+    if(statusFilter==="R"   && st!=="R") return false;
+    if(statusFilter==="NEW" && st==="R") return false;
+    if(statusFilter==="T"   && st!=="T") return false;
+    if(statusFilter==="F"   && st!=="F") return false;
+  }
   if(query){
     if(/^\d+$/.test(query)){
       // pure-number query → exact jersey-number match (both O & D wearing it show)
@@ -309,6 +334,9 @@ function card(p){
   const slot=p[F.slot], dr=p[F.dr];
   const slotTxt=SHOW_SLOT.has(slot)?slot+" · ":"";
   const depthBadge=`<span class="dbadge ${drClass(dr)}" style="--gc:${gc}">${slotTxt}${strLabel(dr)}</span>`;
+  const st=statusOf(p);
+  const stMap={R:["ret","Returner ’25"],T:["tr2","New: Transfer ’26"],F:["fr2","New: Freshman ’26"]};
+  const statusBadge=`<span class="sB ${stMap[st][0]}">${stMap[st][1]}</span>`;
   const badges=[];
   if(p[F.stars]) badges.push(`<span class="b star">★${p[F.stars]} HS</span>`);
   if(p[F.acc]) p[F.acc].split(" · ").forEach(a=>badges.push(`<span class="b acc">${a}</span>`));
@@ -316,7 +344,7 @@ function card(p){
   return `<div class="card ${dr===1?"starter":""}" style="--gc:${gc}">
     <div class="jersey">${p[F.num]}</div>
     <div class="who">
-      <div class="toprow">${depthBadge}</div>
+      <div class="toprow">${depthBadge}${statusBadge}</div>
       <div class="name">${p[F.name]}</div>
       <div class="meta">${p[F.ht]} &middot; ${p[F.wt]} lb <span class="sep">|</span> ${CLASS_FULL[p[F.cls]]||p[F.cls]}</div>
       <div class="home">${p[F.home]} &middot; ${p[F.hs]}</div>
