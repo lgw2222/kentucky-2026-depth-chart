@@ -126,6 +126,7 @@
       <div>Scheme: <b>3-4 / nickel</b></div>
       <div id="uRecord">2025: <b>5–7</b></div>
       <div>Two-deep as of <b>Sep 2, 2026</b></div>
+      <div id="uGame"></div>
     </div>
   </div>
 </header>
@@ -501,11 +502,21 @@ async function j(url){
 
 async function loadTeam(){
   const d=await j(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/${ESPN_TEAM}`);
-  const rec=(((d||{}).team||{}).record||{}).items;
+  const team=(d||{}).team; if(!team) return;
+  const rec=(team.record||{}).items;
   if(Array.isArray(rec)&&rec.length){
     const tot=rec.find(x=>x.type==="total")||rec[0];
     const el=document.getElementById("uRecord");
     if(el&&tot&&tot.summary) el.innerHTML=`2026: <b>${tot.summary}</b>`;
+  }
+  const ev=(team.nextEvent||[])[0], comp=ev&&(ev.competitions||[])[0], g=document.getElementById("uGame");
+  if(g&&comp){
+    const cs=comp.competitors||[], stt=(comp.status||{}).type||{};
+    const ab=c=>((c.team&&(c.team.abbreviation||c.team.shortDisplayName))||"?");
+    if(cs.length===2&&(stt.state==="in"||stt.state==="post")){
+      const line=cs.map(c=>`${ab(c)} <b>${c.score??""}</b>`).join(" · ");
+      g.innerHTML=(stt.state==="in"?"LIVE — ":"Final — ")+line+(stt.shortDetail?` (${stt.shortDetail})`:"");
+    } else if(ev.shortName){ g.textContent="Next: "+ev.shortName; }
   }
 }
 
@@ -518,35 +529,64 @@ async function loadRoster(){
 }
 const rosterReady=loadRoster();
 
-function zipLine(labels,vals){
-  if(!Array.isArray(labels)||!Array.isArray(vals)) return null;
-  const out=[];
-  for(let k=0;k<Math.min(labels.length,vals.length);k++){
-    const v=vals[k];
-    if(v==null||v===""||v==="0"||v==="0.0"||v==="--") continue;
-    out.push(`${v} ${labels[k]}`);
-  }
-  return out.length?out.join(" · "):null;
+function pick(labels,vals,key){
+  const up=(labels||[]).map(l=>String(l).toUpperCase());
+  let i=up.indexOf(key);
+  if(i<0) i=up.findIndex(l=>l.startsWith(key));
+  return i>=0? vals[i] : null;
 }
-function parse2026(o){
-  const s=(o||{}).statistics; if(!s) return null;
-  const labels=s.names||s.labels;
-  if(Array.isArray(s.splits)&&s.splits.length){
-    const sp=s.splits.find(x=>String(x.displayName||"").includes("2026"))||s.splits[0];
-    return zipLine(labels, sp&&sp.stats);
+const isNum=v=>{const n=parseFloat(v);return isNaN(n)?null:n;};
+function fmt2026(group,labels,vals){
+  const P=k=>pick(labels,vals,k), parts=[];
+  if(group==="QB"){
+    const c=P("CMP"),a=P("ATT"),y=P("YDS"),td=P("TD"),i=P("INT");
+    if(c!=null&&a!=null) parts.push(`${c}/${a}`);
+    if(y!=null) parts.push(`${y} pass yds`);
+    if(td!=null) parts.push(`${td} TD`);
+    if(i!=null) parts.push(`${i} INT`);
+  } else if(group==="RB"){
+    const c=P("CAR"),y=P("YDS"),td=P("TD");
+    if(c!=null) parts.push(`${c} car`); if(y!=null) parts.push(`${y} yds`); if(td!=null) parts.push(`${td} TD`);
+  } else if(group==="WR"||group==="TE"){
+    const r=P("REC"),y=P("YDS"),td=P("TD");
+    if(r!=null) parts.push(`${r} rec`); if(y!=null) parts.push(`${y} yds`); if(td!=null) parts.push(`${td} TD`);
+  } else if(group==="DL"||group==="EDGE"||group==="LB"||group==="DB"){
+    const t=P("TOT")||P("TACK")||P("TCKL"),tfl=P("TFL"),s=P("SACK")||P("SCK"),i=P("INT"),pd=P("PD");
+    if(t!=null) parts.push(`${t} tkl`);
+    if(isNum(tfl)) parts.push(`${tfl} TFL`);
+    if(isNum(s)) parts.push(`${s} sack`);
+    if(isNum(i)) parts.push(`${i} INT`);
+    if(group==="DB"&&isNum(pd)) parts.push(`${pd} PD`);
+  } else if(group==="ST"){
+    const fg=P("FGM")||P("FG"),xp=P("XPM")||P("XP"),np=P("PUNTS")||P("NO");
+    if(fg!=null) parts.push(`${fg} FG`); if(xp!=null) parts.push(`${xp} XP`); if(isNum(np)) parts.push(`${np} punts`);
   }
-  if(Array.isArray(s.stats)) return zipLine(labels,s.stats);
-  return null;
+  return parts.some(x=>/[1-9]/.test(x)) ? parts.join(" · ") : null;
 }
-
+async function gamelog2026(id,group){
+  const g=await j(`https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/${id}/gamelog`);
+  if(!g) return null;
+  const labels=g.labels||g.displayNames||g.names||[];
+  const st=(g.seasonTypes||[]).find(s=>String(s.displayName||"").includes("2026"));
+  if(!st) return null;                                   // no 2026 season → nothing to show
+  let vals=Array.isArray(st.totals)?st.totals:null;
+  if(!vals&&Array.isArray(st.categories)) for(const c of st.categories){ if(Array.isArray(c.totals)){vals=c.totals;break;} }
+  if(!vals){
+    let ev=[]; (st.categories||[]).forEach(c=>{ if(Array.isArray(c.events)) ev=ev.concat(c.events); });
+    if(!ev.length&&Array.isArray(st.events)) ev=st.events;
+    if(!ev.length) return null;
+    vals=[]; ev.forEach(e=>{ (e.stats||[]).forEach((v,i)=>{ const n=parseFloat(v); if(!isNaN(n)) vals[i]=(vals[i]||0)+n; }); });
+  }
+  return fmt2026(group,labels,vals);
+}
 async function fillLive(p){
   const el=document.getElementById("live2026"); if(!el) return;
   await rosterReady;
+  const none="Kentucky — no 2026 stats yet";
   const id=IDMAP[norm(p[F.name])];
-  const none="Kentucky — season underway; no 2026 stats yet";
   if(!id){ el.textContent=none; return; }
-  const o=await j(`https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/${id}/overview`);
-  const ln=parse2026(o);
+  let ln=null;
+  try{ ln=await gamelog2026(id,p[F.group]); }catch(e){}
   el.textContent = ln ? ("Kentucky — "+ln) : none;
 }
 
