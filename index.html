@@ -74,6 +74,9 @@
   .sB.tr2{background:#fde7dd;color:#b5490f;border:1px solid #f6ccae}
   .sB.fr2{background:#efe7fb;color:#5a2b9a;border:1px solid #ddccf5}
   .statussel{border:1px solid var(--line);border-radius:9px;background:#fff;padding:8px 10px;font-size:13.5px;font-family:var(--sans);color:var(--ink);font-weight:500}
+  #refreshBtn{font-size:16px;line-height:1;padding:8px 11px}
+  #refreshBtn.spin{animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
   .name{font-weight:700;font-size:15.5px;letter-spacing:-.1px;line-height:1.15;margin-top:5px}
   .meta{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5}
   .meta .sep{color:var(--line)}
@@ -146,6 +149,7 @@
         <option value="T">&nbsp;&nbsp;— Transfers</option>
         <option value="F">&nbsp;&nbsp;— Freshmen</option>
       </select>
+      <button id="refreshBtn" class="toggle" type="button" title="Reload live stats" aria-label="Refresh live stats">↻</button>
       <span class="count" id="count"></span>
     </div>
     <div class="chips" id="chips"></div>
@@ -167,7 +171,7 @@
 <div class="overlay" id="overlay"><div class="modal" role="dialog" aria-modal="true" aria-label="Player details"></div></div>
 
 <footer>
-  The 2026 record and each player’s current-season line load live from ESPN’s public data when the page opens (no key or setup needed); previous seasons are stored in the file. If ESPN can’t be reached, it falls back to the stored numbers.
+  The 2026 record, live score, and each player’s current-game line load live from ESPN’s public data when the page opens (no key or setup needed); previous seasons are stored in the file. If ESPN can’t be reached, it falls back to the stored numbers.
   Roster data from the official UK Athletics roster. Slot labels use Kentucky’s 3-4/nickel scheme (JACK = edge; NB = nickel).
   ★ = verified high-school star rating; green = notable accolade where available.
   Returner = on Kentucky’s 2025 roster; New = joined in 2026 via the portal (transfer) or as a freshman. A few redshirt freshmen who were on the 2025 team are counted as returners.
@@ -326,6 +330,7 @@ document.getElementById("statusSel").addEventListener("change",e=>{statusFilter=
 const sD=document.getElementById("sDepth"),sN=document.getElementById("sNum");
 sD.onclick=()=>{sortMode="depth";sD.dataset.on="1";sN.dataset.on="0";render();};
 sN.onclick=()=>{sortMode="num";sN.dataset.on="1";sD.dataset.on="0";render();};
+document.getElementById("refreshBtn").addEventListener("click",refresh);
 
 const main=document.getElementById("main"),emptyEl=document.getElementById("empty"),countEl=document.getElementById("count");
 const F={num:0,name:1,group:2,pos:3,ht:4,wt:5,cls:6,home:7,hs:8,prev:9,stars:10,slot:11,dr:12,acc:13};
@@ -432,6 +437,7 @@ const STATS={
 };
 
 const overlay=document.getElementById("overlay");
+let curIdx=null;
 const stMapM={R:["ret","Returner ’25"],T:["tr2","New: Transfer ’26"],F:["fr2","New: Freshman ’26"]};
 
 function statBlock(p){
@@ -447,6 +453,7 @@ function statBlock(p){
 
 function openModal(i){
   const p=R[i]; if(!p) return;
+  curIdx=i;
   const gc=`var(${GC[p[F.group]]})`, st=statusOf(p);
   const badges=[`<span class="sB ${stMapM[st][0]}">${stMapM[st][1]}</span>`];
   if(p[F.stars]) badges.push(`<span class="b star">★${p[F.stars]} HS</span>`);
@@ -475,123 +482,130 @@ function openModal(i){
   m.querySelector(".mclose").onclick=closeModal;
   fillLive(p);
 }
-function closeModal(){overlay.classList.remove("on");document.body.style.overflow="";}
+function closeModal(){overlay.classList.remove("on");document.body.style.overflow="";curIdx=null;}
 overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 main.addEventListener("click",e=>{const c=e.target.closest(".card");if(c)openModal(+c.dataset.i);});
 main.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("card")){e.preventDefault();openModal(+e.target.dataset.i);}});
 
 /* ---------- Live data from ESPN's public endpoints (no key, loads in-browser) ----------
-   - Team record refreshes on load.
-   - Each player's 2026 line is fetched when you open their card.
-   - Everything degrades to the stored data if ESPN can't be reached. */
-const ESPN_TEAM=96; // Kentucky
-const IDMAP={};
-const norm=s=>String(s||"").toLowerCase()
-  .replace(/["'’.]/g,"")
+   - Team record + live/last score refresh on load.
+   - Each player's current-game line comes from the box score (updates as the game is played).
+   - Uses the site.web.api host (more reliable) and degrades to stored data if unreachable. */
+const ESPN_TEAM=96, ESPN_ABBR="UK"; // Kentucky
+const BASE="https://site.web.api.espn.com/apis/site/v2/sports/football/college-football";
+const norm=s=>String(s||"")
+  .replace(/["“”][^"“”]*["“”]/g,"")           // drop "Bo" / "CJ" style nicknames
+  .toLowerCase()
+  .replace(/[.'’]/g,"")
   .replace(/\b(jr|sr|ii|iii|iv)\b/g,"")
   .replace(/[^a-z ]/g,"").replace(/\s+/g," ").trim();
 
 async function j(url){
   try{
-    const c=new AbortController(), t=setTimeout(()=>c.abort(),6500);
+    const c=new AbortController(), t=setTimeout(()=>c.abort(),7000);
     const r=await fetch(url,{signal:c.signal}); clearTimeout(t);
     return r.ok? await r.json() : null;
   }catch(e){ return null; }
 }
 
+// current-game player stats, keyed by normalized name → { passing:{labels,stats}, rushing:{…}, … }
+const BOX={};
+let gameLabel="", boxDone, liveTimer=null; const boxReady=new Promise(r=>boxDone=r);
+
 async function loadTeam(){
-  const d=await j(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/${ESPN_TEAM}`);
-  const team=(d||{}).team; if(!team) return;
-  const rec=(team.record||{}).items;
-  if(Array.isArray(rec)&&rec.length){
-    const tot=rec.find(x=>x.type==="total")||rec[0];
-    const el=document.getElementById("uRecord");
-    if(el&&tot&&tot.summary) el.innerHTML=`2026: <b>${tot.summary}</b>`;
-  }
-  const ev=(team.nextEvent||[])[0], comp=ev&&(ev.competitions||[])[0], g=document.getElementById("uGame");
-  if(g&&comp){
-    const cs=comp.competitors||[], stt=(comp.status||{}).type||{};
-    const ab=c=>((c.team&&(c.team.abbreviation||c.team.shortDisplayName))||"?");
-    if(cs.length===2&&(stt.state==="in"||stt.state==="post")){
-      const line=cs.map(c=>`${ab(c)} <b>${c.score??""}</b>`).join(" · ");
-      g.innerHTML=(stt.state==="in"?"LIVE — ":"Final — ")+line+(stt.shortDetail?` (${stt.shortDetail})`:"");
-    } else if(ev.shortName){ g.textContent="Next: "+ev.shortName; }
+  const d=await j(`${BASE}/teams/${ESPN_TEAM}`);
+  const team=(d||{}).team;
+  if(team){
+    const rec=(team.record||{}).items;
+    if(Array.isArray(rec)&&rec.length){
+      const tot=rec.find(x=>x.type==="total")||rec[0];
+      const el=document.getElementById("uRecord");
+      if(el&&tot&&tot.summary) el.innerHTML=`2026: <b>${tot.summary}</b>`;
+    }
+    const ev=(team.nextEvent||[])[0], comp=ev&&(ev.competitions||[])[0], g=document.getElementById("uGame");
+    if(comp){
+      const cs=comp.competitors||[], stt=(comp.status||{}).type||{};
+      const ab=c=>((c.team&&(c.team.abbreviation||c.team.shortDisplayName))||"?");
+      if(g){
+        if(cs.length===2&&(stt.state==="in"||stt.state==="post")){
+          const line=cs.map(c=>`${ab(c)} <b>${c.score??""}</b>`).join(" · ");
+          g.innerHTML=(stt.state==="in"?"LIVE — ":"Final — ")+line+(stt.shortDetail?` (${stt.shortDetail})`:"");
+        } else if(ev&&ev.shortName){ g.textContent="Next: "+ev.shortName; }
+      }
+      if(stt.state==="in"){ clearTimeout(liveTimer); liveTimer=setTimeout(refresh,60000); }
+      const opp=cs.find(c=>ab(c)!==ESPN_ABBR);
+      if(opp) gameLabel=(opp.homeAway==="home"?"at ":"vs ")+ab(opp);
+      if(ev&&ev.id) await loadBox(ev.id);
+    }
   }
 }
 
-async function loadRoster(){
-  const d=await j(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/${ESPN_TEAM}/roster`);
-  const groups=(d||{}).athletes||[];
-  const flat=[];
-  groups.forEach(g=>{ if(g&&Array.isArray(g.items)) g.items.forEach(a=>flat.push(a)); else if(g&&g.id) flat.push(g); });
-  flat.forEach(a=>{ if(a&&a.id) IDMAP[norm(a.fullName||a.displayName)]=a.id; });
+async function loadBox(eventId){
+  const s=await j(`${BASE}/summary?event=${eventId}`);
+  const players=((s||{}).boxscore||{}).players||[];
+  players.forEach(tm=>{
+    const t=tm.team||{};
+    if(String(t.id)!==String(ESPN_TEAM) && t.abbreviation!==ESPN_ABBR) return;
+    (tm.statistics||[]).forEach(cat=>{
+      (cat.athletes||[]).forEach(a=>{
+        const ath=a.athlete||{}, key=norm(ath.displayName||ath.fullName);
+        if(!key) return;
+        (BOX[key]=BOX[key]||{})[cat.name]={labels:cat.labels||[],stats:a.stats||[]};
+      });
+    });
+  });
 }
-const rosterReady=loadRoster();
 
-function pick(labels,vals,key){
-  const up=(labels||[]).map(l=>String(l).toUpperCase());
-  let i=up.indexOf(key);
-  if(i<0) i=up.findIndex(l=>l.startsWith(key));
-  return i>=0? vals[i] : null;
+function gv(b,cat,key){
+  const c=b[cat]; if(!c) return null;
+  const i=(c.labels||[]).findIndex(l=>String(l).toUpperCase()===key);
+  return i>=0? c.stats[i] : null;
 }
-const isNum=v=>{const n=parseFloat(v);return isNaN(n)?null:n;};
-function fmt2026(group,labels,vals){
-  const P=k=>pick(labels,vals,k), parts=[];
-  if(group==="QB"){
-    const c=P("CMP"),a=P("ATT"),y=P("YDS"),td=P("TD"),i=P("INT");
-    if(c!=null&&a!=null) parts.push(`${c}/${a}`);
-    if(y!=null) parts.push(`${y} pass yds`);
-    if(td!=null) parts.push(`${td} TD`);
-    if(i!=null) parts.push(`${i} INT`);
-  } else if(group==="RB"){
-    const c=P("CAR"),y=P("YDS"),td=P("TD");
-    if(c!=null) parts.push(`${c} car`); if(y!=null) parts.push(`${y} yds`); if(td!=null) parts.push(`${td} TD`);
-  } else if(group==="WR"||group==="TE"){
-    const r=P("REC"),y=P("YDS"),td=P("TD");
-    if(r!=null) parts.push(`${r} rec`); if(y!=null) parts.push(`${y} yds`); if(td!=null) parts.push(`${td} TD`);
-  } else if(group==="DL"||group==="EDGE"||group==="LB"||group==="DB"){
-    const t=P("TOT")||P("TACK")||P("TCKL"),tfl=P("TFL"),s=P("SACK")||P("SCK"),i=P("INT"),pd=P("PD");
-    if(t!=null) parts.push(`${t} tkl`);
-    if(isNum(tfl)) parts.push(`${tfl} TFL`);
-    if(isNum(s)) parts.push(`${s} sack`);
-    if(isNum(i)) parts.push(`${i} INT`);
-    if(group==="DB"&&isNum(pd)) parts.push(`${pd} PD`);
-  } else if(group==="ST"){
-    const fg=P("FGM")||P("FG"),xp=P("XPM")||P("XP"),np=P("PUNTS")||P("NO");
-    if(fg!=null) parts.push(`${fg} FG`); if(xp!=null) parts.push(`${xp} XP`); if(isNum(np)) parts.push(`${np} punts`);
+const nz=v=>v!=null&&v!==""&&v!=="0"&&v!=="0.0"&&v!=="0/0"&&v!=="--";
+function boxLine(p){
+  const b=BOX[norm(p[F.name])]; if(!b) return null;
+  const out=[];
+  if(b.passing){
+    const ca=gv(b,"passing","C/ATT"),y=gv(b,"passing","YDS"),td=gv(b,"passing","TD"),i=gv(b,"passing","INT");
+    const s=[]; if(nz(ca))s.push(ca); if(y!=null)s.push(`${y} pass yds`); if(nz(td))s.push(`${td} TD`); if(nz(i))s.push(`${i} INT`);
+    if(s.length)out.push(s.join(", "));
   }
-  return parts.some(x=>/[1-9]/.test(x)) ? parts.join(" · ") : null;
-}
-async function gamelog2026(id,group){
-  const g=await j(`https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/${id}/gamelog`);
-  if(!g) return null;
-  const labels=g.labels||g.displayNames||g.names||[];
-  const st=(g.seasonTypes||[]).find(s=>String(s.displayName||"").includes("2026"));
-  if(!st) return null;                                   // no 2026 season → nothing to show
-  let vals=Array.isArray(st.totals)?st.totals:null;
-  if(!vals&&Array.isArray(st.categories)) for(const c of st.categories){ if(Array.isArray(c.totals)){vals=c.totals;break;} }
-  if(!vals){
-    let ev=[]; (st.categories||[]).forEach(c=>{ if(Array.isArray(c.events)) ev=ev.concat(c.events); });
-    if(!ev.length&&Array.isArray(st.events)) ev=st.events;
-    if(!ev.length) return null;
-    vals=[]; ev.forEach(e=>{ (e.stats||[]).forEach((v,i)=>{ const n=parseFloat(v); if(!isNaN(n)) vals[i]=(vals[i]||0)+n; }); });
+  if(b.rushing){
+    const c=gv(b,"rushing","CAR"),y=gv(b,"rushing","YDS"),td=gv(b,"rushing","TD");
+    const s=[]; if(nz(c))s.push(`${c} car`); if(y!=null)s.push(`${y} rush yds`); if(nz(td))s.push(`${td} TD`);
+    if(s.length)out.push(s.join(", "));
   }
-  return fmt2026(group,labels,vals);
+  if(b.receiving){
+    const r=gv(b,"receiving","REC"),y=gv(b,"receiving","YDS"),td=gv(b,"receiving","TD");
+    const s=[]; if(nz(r))s.push(`${r} rec`); if(y!=null)s.push(`${y} rec yds`); if(nz(td))s.push(`${td} TD`);
+    if(s.length)out.push(s.join(", "));
+  }
+  const dt=gv(b,"defensive","TOT"),tfl=gv(b,"defensive","TFL"),sk=gv(b,"defensive","SACKS"),di=gv(b,"interceptions","INT");
+  { const s=[]; if(nz(dt))s.push(`${dt} tkl`); if(nz(tfl))s.push(`${tfl} TFL`); if(nz(sk))s.push(`${sk} sack`); if(nz(di))s.push(`${di} INT`); if(s.length)out.push(s.join(", ")); }
+  const fg=gv(b,"kicking","FG"),xp=gv(b,"kicking","XP");
+  { const s=[]; if(nz(fg))s.push(`${fg} FG`); if(nz(xp))s.push(`${xp} XP`); if(s.length)out.push(s.join(", ")); }
+  const np=gv(b,"punting","NO"),pa=gv(b,"punting","AVG");
+  { const s=[]; if(nz(np))s.push(`${np} punts`); if(nz(pa))s.push(`${pa} avg`); if(s.length)out.push(s.join(", ")); }
+  return out.length? out.join(" · ") : null;
 }
+
 async function fillLive(p){
   const el=document.getElementById("live2026"); if(!el) return;
-  await rosterReady;
-  const none="Kentucky — no 2026 stats yet";
-  const id=IDMAP[norm(p[F.name])];
-  if(!id){ el.textContent=none; return; }
-  let ln=null;
-  try{ ln=await gamelog2026(id,p[F.group]); }catch(e){}
-  el.textContent = ln ? ("Kentucky — "+ln) : none;
+  await boxReady;
+  const ln=boxLine(p);
+  el.textContent = ln ? (`Kentucky ${gameLabel} — ${ln}`).replace("  "," ") : "Kentucky — no 2026 game stats yet";
+}
+async function refresh(){
+  const btn=document.getElementById("refreshBtn"); if(btn) btn.classList.add("spin");
+  for(const k in BOX) delete BOX[k];
+  await loadTeam().catch(()=>{});
+  if(overlay.classList.contains("on") && curIdx!=null) fillLive(R[curIdx]);
+  if(btn) btn.classList.remove("spin");
 }
 
 render();
-loadTeam();
+loadTeam().catch(()=>{}).finally(()=>boxDone());
 </script>
 </body>
 </html>
