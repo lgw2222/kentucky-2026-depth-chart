@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kentucky Wildcats 2026 Depth Chart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --uk:#0033A0; --uk-dark:#001b57; --ink:#10151f; --muted:#5b6472;
+    --line:#dfe4ec; --bg:#eef1f6; --card:#ffffff;
+    --QB:#0033A0; --RB:#1565C0; --WR:#0288D1; --TE:#00897B;
+    --OL:#455A64; --DL:#B71C1C; --EDGE:#E65100; --LB:#AD1457;
+    --DB:#6A1B9A; --ST:#607D8B;
+    --acc:#1b7a43;
+    --num:"Oswald","Arial Narrow",sans-serif;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.4}
+
+  header.mast{background:linear-gradient(160deg,var(--uk) 0%,var(--uk-dark) 100%);color:#fff;padding:26px 18px 20px}
+  .mast-inner{max-width:1180px;margin:0 auto}
+  .mast h1{font-family:var(--num);font-weight:700;letter-spacing:.5px;font-size:clamp(27px,5.6vw,44px);margin:0;line-height:.98;text-transform:uppercase}
+  .mast h1 span{display:block;font-weight:400;font-size:.42em;letter-spacing:3px;color:#b9c8ee;margin-top:8px}
+  .mast .facts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:16px;font-size:13.5px;color:#d7e0f6}
+  .mast .facts b{color:#fff;font-weight:600}
+
+  .controls{position:sticky;top:0;z-index:20;background:rgba(238,241,246,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 18px}
+  .controls-inner{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+  .row1{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .search{flex:1 1 200px;min-width:0;border:1px solid var(--line);border-radius:9px;background:#fff;padding:9px 12px;font-size:15px;font-family:var(--sans);color:var(--ink)}
+  .search:focus{outline:2px solid var(--uk);border-color:var(--uk)}
+  .toggle{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 12px;cursor:pointer;user-select:none;white-space:nowrap;font-weight:500}
+  .toggle input{accent-color:var(--uk);width:16px;height:16px}
+  .sortwrap{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
+  .sortwrap button{border:0;background:#fff;color:var(--muted);font-family:var(--sans);font-weight:600;font-size:13px;padding:8px 13px;cursor:pointer}
+  .sortwrap button[data-on="1"]{background:var(--uk);color:#fff}
+  .count{font-size:13px;color:var(--muted);white-space:nowrap;margin-left:auto;font-weight:500}
+  .chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+  .chip{flex:0 0 auto;border:1.5px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .chip[data-on="1"]{background:var(--uk);border-color:var(--uk);color:#fff}
+  .chip.g[data-on="1"]{background:var(--gc);border-color:var(--gc)}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11.5px;color:var(--muted);align-items:center}
+  .legend .sw{display:inline-flex;align-items:center;gap:5px}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .sw.s1 i{background:var(--uk)} .sw.s2 i{background:#9db4e6} .sw.s3 i{background:#fff;border:1.5px solid var(--uk)} .sw.sr i{background:#c7ced9}
+  .sw.tr i{background:#fde9e0;border:1px solid #f6d2ba} .sw.ac i{background:#e2f2e8;border:1px solid #bfe3cd} .sw.st i{background:#fff6da;border:1px solid #f0dd9c}
+
+  main{max-width:1180px;margin:0 auto;padding:18px 14px 60px}
+  .group{margin-top:26px}
+  .group:first-child{margin-top:8px}
+  .group-head{display:flex;align-items:baseline;gap:10px;padding:0 4px 9px;border-bottom:2px solid var(--gc);margin-bottom:14px}
+  .group-head .gname{font-family:var(--num);text-transform:uppercase;letter-spacing:1px;font-size:19px;font-weight:600;color:var(--gc)}
+  .group-head .gcount{font-size:12.5px;color:var(--muted);font-weight:600}
+  .grid{display:grid;gap:11px;grid-template-columns:repeat(auto-fill,minmax(222px,1fr))}
+
+  .card{position:relative;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--gc);border-radius:11px;padding:12px 13px 12px 14px;display:flex;gap:12px;align-items:flex-start;min-height:96px}
+  .card.starter{box-shadow:inset 0 0 0 1px var(--gc)}
+  .jersey{font-family:var(--num);font-weight:700;line-height:.85;font-size:40px;color:var(--gc);min-width:46px;text-align:center;letter-spacing:-1px}
+  .who{min-width:0;flex:1}
+  .toprow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .dbadge{font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 7px;letter-spacing:.3px;white-space:nowrap}
+  .dbadge.d1{background:var(--gc);color:#fff}
+  .dbadge.d2{background:#e7edfa;color:#274b9e}
+  .dbadge.d3{background:#fff;color:var(--muted);border:1px solid var(--line)}
+  .dbadge.dr{background:#eef1f5;color:#8b95a3;border:1px solid var(--line)}
+  .name{font-weight:700;font-size:15.5px;letter-spacing:-.1px;line-height:1.15;margin-top:5px}
+  .meta{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .meta .sep{color:var(--line)}
+  .home{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .badges{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
+  .b{font-size:11px;font-weight:600;border-radius:5px;padding:2px 7px;line-height:1.5}
+  .b.tr{background:#fde9e0;color:#b5490f;border:1px solid #f6d2ba}
+  .b.star{background:#fff6da;color:#8a6a00;border:1px solid #f0dd9c}
+  .b.acc{background:#e2f2e8;color:#166a3a;border:1px solid #bfe3cd}
+  .empty{display:none;text-align:center;color:var(--muted);padding:50px 10px;font-size:15px}
+
+  footer{max-width:1180px;margin:0 auto;padding:0 18px 40px;color:var(--muted);font-size:12px}
+  @media (max-width:520px){
+    .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px}
+    .jersey{font-size:33px;min-width:38px}
+    .card{padding:11px;gap:9px}
+    .name{font-size:14px}
+    .count{width:100%;margin-left:0;text-align:right}
+  }
+</style>
+</head>
+<body>
+<header class="mast">
+  <div class="mast-inner">
+    <h1>Kentucky Wildcats<span>2026 Depth Chart</span></h1>
+    <div class="facts">
+      <div>HC <b>Will Stein</b> (Yr 1)</div>
+      <div>OC <b>Joe Sloan</b></div>
+      <div>DC <b>Jay Bateman</b></div>
+      <div>Scheme: <b>3-4 / nickel</b></div>
+      <div>2025: <b>5–7</b></div>
+      <div>Two-deep as of <b>Sep 2, 2026</b></div>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="row1">
+      <input id="q" class="search" type="text" placeholder="Search name, hometown, school…" autocomplete="off">
+      <div class="sortwrap">
+        <button id="sDepth" data-on="1">Depth order</button>
+        <button id="sNum" data-on="0">By #</button>
+      </div>
+      <label class="toggle"><input type="checkbox" id="trOnly"> Transfers</label>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="legend">
+      <span class="sw s1"><i></i>Starter</span>
+      <span class="sw s2"><i></i>2nd</span>
+      <span class="sw s3"><i></i>3rd</span>
+      <span class="sw sr"><i></i>Reserve</span>
+      <span class="sw st"><i></i>★ HS stars</span>
+      <span class="sw tr"><i></i>Transfer</span>
+      <span class="sw ac"><i></i>Accolade</span>
+    </div>
+  </div>
+</div>
+
+<main id="main"></main>
+<div class="empty" id="empty">No players match that filter.</div>
+
+<footer>
+  Depth order = projected two-deep/three-deep from public sources (updated Sep 2, 2026); game-day order can shift.
+  Roster data from the official UK Athletics roster. Slot labels use Kentucky’s 3-4/nickel scheme (JACK = edge; NB = nickel).
+  ★ = verified high-school star rating; green = notable accolade where available.
+</footer>
+
+<script>
+const GROUPS=[
+  {k:"QB",name:"Quarterbacks"},{k:"RB",name:"Running Backs"},{k:"WR",name:"Wide Receivers"},
+  {k:"TE",name:"Tight Ends"},{k:"OL",name:"Offensive Line"},{k:"DL",name:"Defensive Line"},
+  {k:"EDGE",name:"Edge (JACK)"},{k:"LB",name:"Linebackers"},{k:"DB",name:"Defensive Backs"},
+  {k:"ST",name:"Special Teams"},
+];
+const GC={QB:"--QB",RB:"--RB",WR:"--WR",TE:"--TE",OL:"--OL",DL:"--DL",EDGE:"--EDGE",LB:"--LB",DB:"--DB",ST:"--ST"};
+const SLOT_ORDER={QB:1,RB:1,"WR-X":1,"WR-Z":2,"WR-F":3,TE:1,LT:1,LG:2,C:3,RG:4,RT:5,DE:1,NT:2,DT:3,JACK:1,WLB:1,MLB:2,CB:1,SS:3,FS:4,NB:5,PK:1,P:2,LS:3,"":9};
+// slots where we print the slot code (adds info beyond the group)
+const SHOW_SLOT=new Set(["WR-X","WR-Z","WR-F","LT","LG","C","RG","RT","DE","NT","DT","JACK","WLB","MLB","CB","SS","FS","NB"]);
+const CLASS_FULL={FR:"Fr",SO:"So",JR:"Jr",SR:"Sr","5Y":"5th"};
+
+// [num,name,group,pos,ht,wt,class,home,hs,prev,stars,slot,dr,acc]
+const R=[
+["0","Elijah \"Bo\" Barnes","LB","LB","6-1","244","SO","Dallas, TX","Skyline","Texas",5,"WLB",2,""],
+["0","Martels Carter Jr.","RB","RB","6-0","205","SO","Chattanooga, TN","Paducah Tilghman","",0,"RB",9,""],
+["1","CJ Baxter","RB","RB","6-1","227","SR","Boynton Beach, FL","Edgewater","Texas",5,"RB",1,"Under Armour All-American"],
+["1","Andre Clarke Jr.","DB","DB","6-1","176","FR","Richmond, VA","Hermitage","",0,"",9,""],
+["2","Jovantae Barnes","RB","RB","6-0","211","5Y","Las Vegas, NV","Desert Pines","Oklahoma",0,"RB",2,""],
+["2","Sam Greene","EDGE","OLB","6-2","251","SR","Washington, D.C.","St. Frances Academy","USC",0,"JACK",1,""],
+["3","Aaron Gates","DB","NB","6-0","199","SR","Newnan, GA","Trinity Christian","Florida",0,"NB",1,""],
+["3","Kenny Minchey","QB","QB","6-2","211","SR","Hendersonville, TN","Pope John Paul II","Notre Dame",4,"QB",1,"Elite 11 · All-American Bowl"],
+["4","Nic Anderson","WR","WR","6-4","208","5Y","Katy, TX","Katy","LSU / Oklahoma",4,"WR-Z",2,"Freshman AA '23 · All-Big 12 HM"],
+["4","Antwan Smith","LB","ILB","6-3","226","JR","Atlanta, GA","Westlake","",0,"WLB",1,""],
+["5","Jordan Castell","DB","S","6-2","211","SR","Orlando, FL","West Orange","Florida",0,"FS",1,"Freshman All-SEC '23 (UF)"],
+["5","Ja'Kayden Ferguson","WR","WR","6-2","184","SO","Houston, TX","Thurgood Marshall","Arkansas",0,"WR-Z",1,""],
+["6","Ahmad Breaux","DL","DT","6-3","278","JR","Ruston, LA","Ruston","LSU",0,"DT",2,""],
+["6","Shane Carr","WR","WR","6-2","185","SR","Bakersfield, CA","South","Southern Utah",0,"WR-F",1,""],
+["7","Jamarrion Harkless","DL","DL","6-3","346","SR","Lexington, KY","Frederick Douglass","Purdue",0,"NT",1,""],
+["7","DJ Miller","WR","WR","6-3","208","SO","St. Louis, MO","Cardinal Ritter","",0,"WR-X",1,""],
+["8","Lorenzo Cowan","EDGE","OLB","6-3","250","JR","Savannah, GA","Jenkins","USC",0,"JACK",2,""],
+["8","Mikkel Skinner","TE","TE","6-4","234","SO","Greer, SC","Riverside","",0,"TE",3,""],
+["9","Matt Ponatoski","QB","QB","6-1","205","FR","Cincinnati, OH","Archbishop Moeller","",4,"QB",3,""],
+["10","Dyllon Williams","DB","DB","6-2","191","SO","Demopolis, AL","Demopolis","",0,"FS",3,""],
+["10","Callum Wither","QB","QB","6-4","217","5Y","Toronto, Canada","Clarkson","Ohio / W. Laurier",0,"QB",9,""],
+["11","Braxton Urquhart","DB","DB","6-3","200","SR","Birmingham, AL","Hoover","Butler CC",0,"",9,""],
+["11","Lincoln Watkins","TE","TE","6-4","234","FR","Fort Gratiot, MI","Northern","",0,"TE",9,""],
+["12","Brock Coffman","WR","WR","6-0","181","SO","Lexington, KY","Sayre","Louisville",0,"WR-X",3,""],
+["12","Hasaan Sykes","DB","CB","6-0","192","JR","Atlanta, GA","Tucker","Western Carolina",0,"CB",1,""],
+["13","Denairius Gray","WR","WR","6-2","181","FR","Boynton Beach, FL","Chaminade-Madonna","",0,"WR-F",2,""],
+["13","Cyrus Reyes","DB","S","6-1","192","JR","Katy, TX","Taylor","Mississippi State",0,"SS",2,""],
+["14","Ty Bryant","DB","DB","6-0","196","SR","Lexington, KY","Frederick Douglass","",0,"SS",1,""],
+["14","Brennen Ward","QB","QB","6-4","227","SO","Gahanna, OH","Gahanna Lincoln","",0,"QB",9,""],
+["15","Carson Cruver","QB","QB","6-3","203","SR","Austin, TX","St. Michael's","Florida Atlantic",0,"QB",9,""],
+["15","Cedric \"CJ\" Works","EDGE","OLB","6-5","247","SO","Dayton, OH","Frederick Douglass","",0,"JACK",3,""],
+["16","Jesse Anderson III","DB","S","6-0","185","SR","Fort Lauderdale, FL","Cardinal Gibbons","Pitt",0,"FS",2,""],
+["16","JacQai Long","QB","QB","6-2","203","JR","Hurricane, WV","Hurricane","Marshall",0,"QB",2,""],
+["17","William Drakeford Jr.","QB","QB","6-2","195","FR","Gaithersburg, MD","Quince Orchard","",0,"QB",9,""],
+["17","Justyn Hartley","LB","ILB","6-1","192","FR","Hoover, AL","Hoover","",0,"MLB",9,""],
+["18","Xavier Daisy","WR","WR","6-3","212","JR","Norcross, GA","Greater Atlanta Christian","UAB",0,"WR-X",2,""],
+["18","Mark Manfred III","DB","CB","6-2","171","SO","Marietta, GA","Sprayberry","Missouri",0,"",9,""],
+["19","Kenny Darby","WR","WR","6-1","180","FR","Bossier City, LA","Airline","",0,"WR-Z",3,""],
+["19","Kevis Thomas","DB","DB","6-0","181","SR","Perry, FL","Lowndes","Maryland",0,"CB",3,""],
+["20","Terhyon Nichols","DB","DB","5-11","194","JR","Cincinnati, OH","Withrow","",0,"CB",1,""],
+["21","Nasir Addison","DB","DB","6-0","204","SR","Irvington, NJ","Irvington","",0,"CB",2,""],
+["21","Tovani Mizell","RB","RB","6-0","213","JR","Fort Lauderdale, FL","Western","",0,"RB",9,""],
+["22","Delvecchio Alston II","RB","RB","6-0","210","FR","Trussville, AL","Hewitt-Trussville","",0,"RB",9,""],
+["22","Grant Godfrey","LB","ILB","6-3","240","SR","Suwanee, GA","North Gwinnett","",0,"MLB",1,""],
+["23","Brian Robinson","DL","DL","6-5","257","JR","Youngstown, OH","Westerville North","",0,"DE",2,""],
+["24","Jaden Smith","DB","DB","6-3","205","SO","Charlotte, NC","West Charlotte","",0,"NB",2,""],
+["25","Tavion Wallace","LB","ILB","6-1","241","SO","Jesup, GA","Appling County","Arkansas",0,"MLB",2,""],
+["26","Jason Patterson","RB","RB","5-10","204","JR","Sneads, FL","Sneads","",0,"RB",3,""],
+["26","Andrew Purcell","DB","DB","5-10","201","SO","Enterprise, AL","Enterprise","",0,"SS",3,""],
+["27","Isaiah McMillian","DB","DB","6-1","176","FR","Katy, TX","Katy","",0,"",9,""],
+["28","Demarcus Gardner","DB","DB","6-0","177","SO","Cedartown, GA","Cedartown","",0,"CB",3,""],
+["28","Ahmir Smith","RB","RB","5-10","200","JR","Santee, SC","Calhoun County","N. Illinois / Garden City CC",0,"RB",9,""],
+["29","Jordan Colbert","RB","RB","6-2","215","JR","Merced, CA","San Joaquin Memorial","Fresno City College",0,"RB",9,""],
+["30","Grant Grayton","DB","DB","6-3","194","SO","Laurel, MD","Good Counsel","",0,"CB",2,""],
+["31","Quintavion Norman","LB","ILB","6-3","223","JR","Covington, GA","Newton","",0,"WLB",3,""],
+["32","Devin Smith","LB","ILB","6-0","231","JR","Brunswick, GA","Brunswick","",0,"MLB",3,""],
+["33","Sam Brown III","DB","S","5-11","172","FR","San Clemente, CA","Capistrano Valley Christian","",0,"",9,""],
+["33","Rico Crowder","WR","WR","6-4","201","JR","Glasgow, KY","Glasgow","",0,"WR",9,""],
+["34","Isaiah Jackson","RB","RB","5-10","185","FR","Richmond, KY","Rockcastle County","",0,"RB",9,""],
+["35","Matthew Obermeier","ST","K","5-11","160","FR","Carmel, IN","Carmel","",0,"PK",9,""],
+["36","Andrew Weber","DB","DB","6-0","179","JR","Cincinnati, OH","St. Xavier","",0,"",9,""],
+["37","Spencer Leadbetter","WR","WR","6-3","198","SR","Glenview, IL","Loyola Academy","",0,"WR",9,""],
+["38","Tyler Wright","DB","DB","5-11","178","FR","Bixby, OK","Bixby","",0,"",9,""],
+["39","Saxton Howard","WR","WR","6-0","177","SO","Lexington, KY","Lexington Christian","",0,"WR",9,""],
+["40","Cole Marszalek","ST","LS","5-11","197","SR","Goodyear, AZ","Millennium","Jacksonville State",0,"LS",1,""],
+["44","Justin Kattus","TE","TE","6-1","216","JR","Cincinnati, OH","St. Xavier","",0,"TE",9,""],
+["48","Thomas O'Hara","ST","P","6-1","201","SR","Melbourne, Australia","St. Bede's","Murray State",0,"P",1,""],
+["50","Max Anderson","OL","OL","6-5","311","JR","Frisco, TX","Reedy","Tennessee",4,"RT",2,""],
+["52","Cameron Miller Jr.","OL","OL","6-5","341","FR","Hammond, IN","Morton","",0,"OL",9,""],
+["53","Lance Heard","OL","OT","6-6","325","SR","Bonita, LA","Neville","Tennessee / LSU",5,"LT",1,"Preseason All-SEC · Outland WL"],
+["53","Ben Reeves","EDGE","OLB","6-2","242","JR","Edgewood, KY","Covington Catholic","Georgetown College",0,"",9,""],
+["55","Aba Selm","OL","OL","6-4","327","JR","Independence, KY","Simon Kenton","",0,"LG",2,""],
+["57","Jordan Knox","OL","OL","6-2","329","SR","Rock Hill, SC","Northwestern","Northwestern / NW Miss. JC",0,"RG",2,""],
+["59","Jack Wheeler","ST","LS","6-4","248","FR","Charlotte, NC","Cannon School","",0,"LS",3,""],
+["60","Mason Howard","OL","OL","6-4","321","FR","Fort Thomas, KY","Highlands","",0,"OL",9,""],
+["61","Jason Ekperuoh","OL","OL","6-6","354","SO","Montreal, Quebec","The Webb School (TN)","",0,"OL",9,""],
+["62","Ben Myers","OL","OL","6-4","286","FR","Paducah, KY","Paducah Tilghman","",0,"OL",9,""],
+["64","Ryan Meeker","OL","OL","6-1","311","FR","Wheelersburg, OH","Wheelersburg","",0,"OL",9,""],
+["66","Tino Merlo","OL","OL","6-2","278","SR","Youngstown, OH","Cardinal Mooney","",0,"OL",9,""],
+["67","Mark Robinson","OL","OT","6-5","328","JR","Altamonte Springs, FL","Lyman","UTEP / Southeastern",0,"LT",2,""],
+["68","Alexander DiMartino","OL","OL","6-4","306","SO","Fort Lauderdale, FL","Fort Lauderdale","",0,"OL",9,""],
+["69","Hank Timon","OL","OL","6-6","318","FR","Guilford, IN","East Central","",0,"OL",9,""],
+["70","Rob Fogler","OL","OL","6-7","325","SR","Cincinnati, OH","St. Xavier","Ball State",0,"OL",9,""],
+["71","Malachi Wood","OL","OL","6-8","329","SR","Richmond, KY","Madison Central","",0,"RT",1,""],
+["72","Coleton Price","OL","OL","6-3","308","5Y","Bowie, TX","Bowie","Baylor",0,"C",1,""],
+["73","Olaus Alinen","OL","OT","6-6","329","SR","Pori, Finland","Loomis Chaffee","Alabama",4,"RG",1,""],
+["74","Jermiel Atkins Jr.","OL","OL","6-8","329","SO","Dayton, OH","Madison","",0,"LT",3,""],
+["75","Hayes Johnson","OL","OL","6-4","310","JR","Campbellsville, KY","Taylor County","",0,"C",2,""],
+["77","Tegra Tshabola","OL","OL","6-3","329","5Y","West Chester, OH","Lakota West","Ohio State",4,"LG",1,"2024 CFP Champ (OSU)"],
+["78","Cameron Jones","OL","OL","6-6","335","SR","Weirton, WV","Weir","James Madison",0,"RT",3,""],
+["79","Jay Clark","OL","OL","6-4","318","SO","Cleveland, OH","Northmont","",0,"RG",3,""],
+["80","Ashton Cozart","WR","WR","6-3","202","SR","Flower Mound, TX","Marcus","SMU / Oregon",0,"WR",9,""],
+["81","Willie Rodriguez","TE","TE","6-4","249","JR","Taylor Mill, KY","Covington Catholic","",0,"TE",1,""],
+["82","Kendall Tambling","TE","TE","6-5","240","FR","Gainesville, FL","Eastside","",0,"TE",9,""],
+["83","Prince Jean","WR","WR","6-1","187","FR","Valdosta, GA","Valdosta","",0,"WR-F",3,""],
+["84","Davis McCray","WR","WR","6-2","196","FR","San Antonio, TX","Cornerstone Christian","",0,"WR",9,""],
+["85","Elijah Brown","TE","TE","6-6","263","5Y","Dayton, OH","Wayne","UCF / FAU / Alabama",0,"TE",9,""],
+["87","Henry Boyer","TE","TE","6-6","270","5Y","Chicago, IL","Brother Rice","Illinois",0,"TE",2,""],
+["88","Adam Zouagui","ST","K","5-11","191","SR","Reston, VA","Herndon","USF / Davidson",0,"PK",2,""],
+["89","Cash Harney","WR","WR","5-9","177","FR","Covington, KY","Covington Catholic","",0,"WR",9,""],
+["90","Mi'Quise Humphrey-Grace","DL","DL","6-4","271","5Y","Cincinnati, OH","Princeton","South Dakota",0,"DE",1,""],
+["91","Jacob Kauwe","ST","K","6-1","216","JR","Billings, MT","Billings West","",0,"PK",1,""],
+["91","Jaden Williams","DL","DL","6-4","290","5Y","Inglewood, CA","Campbell Hall","Wyoming",0,"DT",3,""],
+["92","Ben Duncum","EDGE","DE","6-5","224","FR","Austin, TX","Lake Travis","",0,"",9,""],
+["93","Wilson Berry","ST","P","6-4","206","5Y","Maribyrnong, Australia","Maribyrnong College","",0,"P",2,""],
+["93","Kalen Edwards","DL","DL","6-4","335","SO","Dyersburg, TN","Dyersburg","",0,"NT",2,""],
+["94","Tavion Gadson","DL","DL","6-5","303","SR","Savannah, GA","Jenkins","",0,"DT",1,""],
+["96","Dominic Wiseman","DL","DT","6-2","298","5Y","Davenport, IA","Davenport North","South Alabama / Iowa Western CC",0,"NT",3,""],
+["97","Spencer Radnoti","ST","LS","6-3","237","JR","Canton, GA","Cherokee","Georgia State",0,"LS",2,""],
+["97","Tyler Thomas","DL","DE","6-5","260","SR","Mobile, AL","Cottage Hill Christian","South Alabama / UAB",0,"DE",3,""],
+];
+
+let activeGroup="ALL", trOnly=false, query="", sortMode="depth";
+
+const chipsEl=document.getElementById("chips");
+function mkChip(k,label){
+  const c=document.createElement("button");
+  c.className="chip"+(k!=="ALL"?" g":"");
+  c.textContent=label; c.dataset.k=k; c.dataset.on=k==="ALL"?"1":"0";
+  if(k!=="ALL") c.style.setProperty("--gc",`var(${GC[k]})`);
+  c.onclick=()=>{activeGroup=k;document.querySelectorAll(".chip").forEach(x=>x.dataset.on=(x.dataset.k===k?"1":"0"));render();};
+  return c;
+}
+chipsEl.appendChild(mkChip("ALL","All"));
+GROUPS.forEach(g=>chipsEl.appendChild(mkChip(g.k,g.k)));
+
+document.getElementById("q").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();render();});
+document.getElementById("trOnly").addEventListener("change",e=>{trOnly=e.target.checked;render();});
+const sD=document.getElementById("sDepth"),sN=document.getElementById("sNum");
+sD.onclick=()=>{sortMode="depth";sD.dataset.on="1";sN.dataset.on="0";render();};
+sN.onclick=()=>{sortMode="num";sN.dataset.on="1";sD.dataset.on="0";render();};
+
+const main=document.getElementById("main"),emptyEl=document.getElementById("empty"),countEl=document.getElementById("count");
+const F={num:0,name:1,group:2,pos:3,ht:4,wt:5,cls:6,home:7,hs:8,prev:9,stars:10,slot:11,dr:12,acc:13};
+
+function matches(p){
+  if(activeGroup!=="ALL" && p[F.group]!==activeGroup) return false;
+  if(trOnly && !p[F.prev]) return false;
+  if(query){
+    const hay=(p[F.name]+" "+p[F.home]+" "+p[F.hs]+" "+p[F.prev]+" "+p[F.slot]).toLowerCase();
+    if(!hay.includes(query)) return false;
+  }
+  return true;
+}
+function strLabel(dr){return dr===1?"Starter":dr===2?"2nd":dr===3?"3rd":"Reserve";}
+function drClass(dr){return dr===1?"d1":dr===2?"d2":dr===3?"d3":"dr";}
+
+function card(p){
+  const gc=`var(${GC[p[F.group]]})`;
+  const slot=p[F.slot], dr=p[F.dr];
+  const slotTxt=SHOW_SLOT.has(slot)?slot+" · ":"";
+  const depthBadge=`<span class="dbadge ${drClass(dr)}" style="--gc:${gc}">${slotTxt}${strLabel(dr)}</span>`;
+  const badges=[];
+  if(p[F.stars]) badges.push(`<span class="b star">★${p[F.stars]} HS</span>`);
+  if(p[F.acc]) p[F.acc].split(" · ").forEach(a=>badges.push(`<span class="b acc">${a}</span>`));
+  if(p[F.prev]) badges.push(`<span class="b tr">via ${p[F.prev]}</span>`);
+  return `<div class="card ${dr===1?"starter":""}" style="--gc:${gc}">
+    <div class="jersey">${p[F.num]}</div>
+    <div class="who">
+      <div class="toprow">${depthBadge}</div>
+      <div class="name">${p[F.name]}</div>
+      <div class="meta">${p[F.ht]} &middot; ${p[F.wt]} lb <span class="sep">|</span> ${CLASS_FULL[p[F.cls]]||p[F.cls]}</div>
+      <div class="home">${p[F.home]} &middot; ${p[F.hs]}</div>
+      ${badges.length?`<div class="badges">${badges.join("")}</div>`:""}
+    </div>
+  </div>`;
+}
+
+function sortGroup(a,b){
+  if(sortMode==="num") return (+a[F.num])-(+b[F.num]) || a[F.name].localeCompare(b[F.name]);
+  // depth: starters first, then by slot order, then jersey
+  const da=a[F.dr]>3?9:a[F.dr], db=b[F.dr]>3?9:b[F.dr];
+  if(da!==db) return da-db;
+  const sa=SLOT_ORDER[a[F.slot]]??9, sb=SLOT_ORDER[b[F.slot]]??9;
+  if(sa!==sb) return sa-sb;
+  return (+a[F.num])-(+b[F.num]);
+}
+
+function render(){
+  const list=R.filter(matches);
+  countEl.textContent=`${list.length} player${list.length===1?"":"s"}`;
+  if(!list.length){main.innerHTML="";emptyEl.style.display="block";return;}
+  emptyEl.style.display="none";
+  let html="";
+  GROUPS.forEach(g=>{
+    const gp=list.filter(p=>p[F.group]===g.k).sort(sortGroup);
+    if(!gp.length) return;
+    html+=`<section class="group" style="--gc:var(${GC[g.k]})">
+      <div class="group-head"><span class="gname">${g.name}</span><span class="gcount">${gp.length}</span></div>
+      <div class="grid">${gp.map(card).join("")}</div>
+    </section>`;
+  });
+  main.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>
