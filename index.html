@@ -107,7 +107,7 @@
 <div class="controls">
   <div class="controls-inner">
     <div class="row1">
-      <input id="q" class="search" type="text" placeholder="Search name, hometown, school…" autocomplete="off">
+      <input id="q" class="search" type="text" placeholder="Search #, name, hometown, school…" autocomplete="off">
       <div class="sortwrap">
         <button id="sDepth" data-on="1">Depth order</button>
         <button id="sNum" data-on="0">By #</button>
@@ -291,8 +291,13 @@ function matches(p){
   if(activeGroup!=="ALL" && p[F.group]!==activeGroup) return false;
   if(trOnly && !p[F.prev]) return false;
   if(query){
-    const hay=(p[F.name]+" "+p[F.home]+" "+p[F.hs]+" "+p[F.prev]+" "+p[F.slot]).toLowerCase();
-    if(!hay.includes(query)) return false;
+    if(/^\d+$/.test(query)){
+      // pure-number query → exact jersey-number match (both O & D wearing it show)
+      if(p[F.num]!==query) return false;
+    } else {
+      const hay=(p[F.num]+" "+p[F.name]+" "+p[F.home]+" "+p[F.hs]+" "+p[F.prev]+" "+p[F.slot]).toLowerCase();
+      if(!hay.includes(query)) return false;
+    }
   }
   return true;
 }
