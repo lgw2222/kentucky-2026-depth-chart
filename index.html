@@ -127,8 +127,8 @@
       <div>OC <b>Joe Sloan</b></div>
       <div>DC <b>Jay Bateman</b></div>
       <div>Scheme: <b>3-4 / nickel</b></div>
-      <div id="uRecord">2025: <b>5–7</b></div>
-      <div>Two-deep as of <b>Sep 2, 2026</b></div>
+      <div id="uRecord">2026: <b>1–0</b></div>
+      <div>Two-deep · <b>Wk 2 vs Alabama</b></div>
       <div id="uGame"></div>
     </div>
   </div>
@@ -523,22 +523,36 @@ async function loadTeam(){
       const el=document.getElementById("uRecord");
       if(el&&tot&&tot.summary) el.innerHTML=`2026: <b>${tot.summary}</b>`;
     }
-    const ev=(team.nextEvent||[])[0], comp=ev&&(ev.competitions||[])[0], g=document.getElementById("uGame");
-    if(comp){
-      const cs=comp.competitors||[], stt=(comp.status||{}).type||{};
-      const ab=c=>((c.team&&(c.team.abbreviation||c.team.shortDisplayName))||"?");
-      if(g){
-        if(cs.length===2&&(stt.state==="in"||stt.state==="post")){
-          const line=cs.map(c=>`${ab(c)} <b>${c.score??""}</b>`).join(" · ");
-          g.innerHTML=(stt.state==="in"?"LIVE — ":"Final — ")+line+(stt.shortDetail?` (${stt.shortDetail})`:"");
-        } else if(ev&&ev.shortName){ g.textContent="Next: "+ev.shortName; }
-      }
-      if(stt.state==="in"){ clearTimeout(liveTimer); liveTimer=setTimeout(refresh,60000); }
-      const opp=cs.find(c=>ab(c)!==ESPN_ABBR);
-      if(opp) gameLabel=(opp.homeAway==="home"?"at ":"vs ")+ab(opp);
-      if(ev&&ev.id) await loadBox(ev.id);
-    }
   }
+  // find the live game, the most recent completed game, and the next upcoming game
+  const sc=await j(`${BASE}/teams/${ESPN_TEAM}/schedule`);
+  const evs=((sc||{}).events)||[];
+  const ab=c=>((c.team&&(c.team.abbreviation||c.team.shortDisplayName))||"?");
+  const scoreOf=c=>{ const s=c.score; return s&&typeof s==="object"?(s.displayValue??s.value??""):(s??""); };
+  const compOf=ev=>(ev.competitions||[])[0]||{};
+  const stOf=ev=>((compOf(ev).status||ev.status||{}).type||{});
+  const when=ev=>new Date(ev.date||compOf(ev).date||0).getTime();
+  let live=null,lastDone=null,next=null;
+  evs.forEach(ev=>{
+    const st=stOf(ev);
+    if(st.state==="in") live=ev;
+    else if(st.completed||st.state==="post"){ if(!lastDone||when(ev)>when(lastDone)) lastDone=ev; }
+    else { if(!next||when(ev)<when(next)) next=ev; }
+  });
+  const cur=live||lastDone, g=document.getElementById("uGame");
+  if(g){
+    if(cur){
+      const cs=compOf(cur).competitors||[], st=stOf(cur);
+      const line=cs.map(c=>`${ab(c)} <b>${scoreOf(c)}</b>`).join(" · ");
+      g.innerHTML=(live?"LIVE — ":"Final — ")+line+(st.shortDetail?` (${st.shortDetail})`:"");
+    } else if(next){ g.textContent="Next: "+(next.shortName||(compOf(next).competitors||[]).map(ab).join(" vs ")); }
+  }
+  if(cur){
+    const opp=(compOf(cur).competitors||[]).find(c=>ab(c)!==ESPN_ABBR);
+    gameLabel=opp?((opp.homeAway==="home"?"at ":"vs ")+ab(opp)):"2026";
+    if(cur.id) await loadBox(cur.id);
+  }
+  if(live){ clearTimeout(liveTimer); liveTimer=setTimeout(refresh,60000); }
 }
 
 async function loadBox(eventId){
