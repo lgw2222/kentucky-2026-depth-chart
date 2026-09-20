@@ -36,9 +36,6 @@
   .search:focus{outline:2px solid var(--uk);border-color:var(--uk)}
   .toggle{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 12px;cursor:pointer;user-select:none;white-space:nowrap;font-weight:500}
   .toggle input{accent-color:var(--uk);width:16px;height:16px}
-  .sortwrap{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
-  .sortwrap button{border:0;background:#fff;color:var(--muted);font-family:var(--sans);font-weight:600;font-size:13px;padding:8px 13px;cursor:pointer}
-  .sortwrap button[data-on="1"]{background:var(--uk);color:#fff}
   .count{font-size:13px;color:var(--muted);white-space:nowrap;margin-left:auto;font-weight:500}
   .chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
   .chip{flex:0 0 auto;border:1.5px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans)}
@@ -73,6 +70,7 @@
   .sB.ret{background:#eaf0fb;color:#1c3f8f;border:1px solid #cdddf7}
   .sB.tr2{background:#fde7dd;color:#b5490f;border:1px solid #f6ccae}
   .sB.fr2{background:#efe7fb;color:#5a2b9a;border:1px solid #ddccf5}
+  .sB.statb{background:#fff3d6;color:#8a6300;border:1px solid #f0dca0}
   .statussel{border:1px solid var(--line);border-radius:9px;background:#fff;padding:8px 10px;font-size:13.5px;font-family:var(--sans);color:var(--ink);font-weight:500}
   #refreshBtn{font-size:16px;line-height:1;padding:8px 11px}
   #refreshBtn.spin{animation:spin .7s linear infinite}
@@ -139,10 +137,27 @@
   <div class="controls-inner">
     <div class="row1">
       <input id="q" class="search" type="text" placeholder="Search #, name, hometown, school…" autocomplete="off">
-      <div class="sortwrap">
-        <button id="sDepth" data-on="1">Depth order</button>
-        <button id="sNum" data-on="0">By #</button>
-      </div>
+      <select id="sortSel" class="statussel" aria-label="Sort players" title="Sort">
+        <optgroup label="Order">
+          <option value="depth">Depth order</option>
+          <option value="num">Jersey #</option>
+        </optgroup>
+        <optgroup label="Most — 2026 season">
+          <option value="passYds">Pass yds</option>
+          <option value="passTD">Pass TD</option>
+          <option value="rushYds">Rush yds</option>
+          <option value="rushTD">Rush TD</option>
+          <option value="car">Carries</option>
+          <option value="rec">Receptions</option>
+          <option value="recYds">Rec yds</option>
+          <option value="recTD">Rec TD</option>
+          <option value="tkl">Tackles</option>
+          <option value="sacks">Sacks</option>
+          <option value="tfl">TFL</option>
+          <option value="dint">INT (def)</option>
+          <option value="fgm">FG made</option>
+        </optgroup>
+      </select>
       <select id="statusSel" class="statussel" aria-label="Filter by roster status">
         <option value="ALL">All players</option>
         <option value="R">Returning (2025)</option>
@@ -187,6 +202,9 @@ const GROUPS=[
 ];
 const GC={QB:"--QB",RB:"--RB",WR:"--WR",TE:"--TE",OL:"--OL",DL:"--DL",EDGE:"--EDGE",LB:"--LB",DB:"--DB",ST:"--ST"};
 const SLOT_ORDER={QB:1,RB:1,"WR-X":1,"WR-Z":2,"WR-F":3,TE:1,LT:1,LG:2,C:3,RG:4,RT:5,DE:1,NT:2,DT:3,JACK:1,WLB:1,MLB:2,CB:1,SS:3,FS:4,NB:5,PK:1,P:2,LS:3,"":9};
+// stat sort keys → unit label shown on the card badge (season totals live in TOTALS, built from box scores)
+const STAT_UNIT={passYds:"pass yds",passTD:"pass TD",rushYds:"rush yds",rushTD:"rush TD",car:"car",rec:"rec",recYds:"rec yds",recTD:"rec TD",tkl:"tkl",sacks:"sacks",tfl:"TFL",dint:"INT",fgm:"FG"};
+function totVal(p,key){ const t=TOTALS[norm(p[F.name])]; return t&&t[key]?t[key]:0; }
 // slots where we print the slot code (adds info beyond the group)
 const SHOW_SLOT=new Set(["WR-X","WR-Z","WR-F","LT","LG","C","RG","RT","DE","NT","DT","JACK","WLB","MLB","CB","SS","FS","NB"]);
 const CLASS_FULL={FR:"Fr",SO:"So",JR:"Jr",SR:"Sr","5Y":"5th"};
@@ -328,9 +346,7 @@ GROUPS.forEach(g=>chipsEl.appendChild(mkChip(g.k,g.k)));
 
 document.getElementById("q").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();render();});
 document.getElementById("statusSel").addEventListener("change",e=>{statusFilter=e.target.value;render();});
-const sD=document.getElementById("sDepth"),sN=document.getElementById("sNum");
-sD.onclick=()=>{sortMode="depth";sD.dataset.on="1";sN.dataset.on="0";render();};
-sN.onclick=()=>{sortMode="num";sN.dataset.on="1";sD.dataset.on="0";render();};
+document.getElementById("sortSel").addEventListener("change",e=>{sortMode=e.target.value;render();});
 document.getElementById("refreshBtn").addEventListener("click",refresh);
 
 const main=document.getElementById("main"),emptyEl=document.getElementById("empty"),countEl=document.getElementById("count");
@@ -367,6 +383,8 @@ function card(p,ri){
   const st=statusOf(p);
   const stMap={R:["ret","Returner ’25"],T:["tr2","New: Transfer ’26"],F:["fr2","New: Freshman ’26"]};
   const statusBadge=`<span class="sB ${stMap[st][0]}">${stMap[st][1]}</span>`;
+  let statBadge="";
+  if(STAT_UNIT[sortMode]!==undefined){ const v=totVal(p,sortMode); if(v>0){ const disp=Number.isInteger(v)?v:Math.round(v*10)/10; statBadge=`<span class="sB statb">${disp} ${STAT_UNIT[sortMode]}</span>`; } }
   const badges=[];
   if(p[F.stars]) badges.push(`<span class="b star">★${p[F.stars]} HS</span>`);
   if(p[F.acc]) p[F.acc].split(" · ").forEach(a=>badges.push(`<span class="b acc">${a}</span>`));
@@ -374,7 +392,7 @@ function card(p,ri){
   return `<div class="card ${dr===1?"starter":""}" style="--gc:${gc}" data-i="${ri}" tabindex="0" role="button" aria-label="${p[F.name]}, details">
     <div class="jersey">${p[F.num]}</div>
     <div class="who">
-      <div class="toprow">${depthBadge}${statusBadge}</div>
+      <div class="toprow">${depthBadge}${statusBadge}${statBadge}</div>
       <div class="name">${p[F.name]}</div>
       <div class="meta">${p[F.ht]} &middot; ${p[F.wt]} lb <span class="sep">|</span> ${CLASS_FULL[p[F.cls]]||p[F.cls]}</div>
       <div class="home">${p[F.home]} &middot; ${p[F.hs]}</div>
@@ -385,6 +403,11 @@ function card(p,ri){
 
 function sortGroup(a,b){
   if(sortMode==="num") return (+a[F.num])-(+b[F.num]) || a[F.name].localeCompare(b[F.name]);
+  if(STAT_UNIT[sortMode]!==undefined){
+    const va=totVal(a,sortMode), vb=totVal(b,sortMode);
+    if(vb!==va) return vb-va;                    // most first; players with none sink to the bottom
+    return (+a[F.num])-(+b[F.num]);
+  }
   // depth: starters first, then by slot order, then jersey
   const da=a[F.dr]>3?9:a[F.dr], db=b[F.dr]>3?9:b[F.dr];
   if(da!==db) return da-db;
@@ -522,6 +545,7 @@ async function j(url){
 
 const SEASON=[];   // played/live games in order: {id,gm,opp,ha,uks,ops,result,detail,live,done}
 const GBOX={};     // GBOX[gameId] = { normName: {passing:{labels,stats}, …} }
+const TOTALS={};   // TOTALS[normName] = { passYds, rushYds, tkl, … } summed across 2026 games
 let liveTimer=null;
 const _ab=c=>((c.team&&(c.team.abbreviation||c.team.shortDisplayName))||"?");
 const _score=c=>{const s=c.score;return s&&typeof s==="object"?(s.displayValue??s.value??""):(s??"");};
@@ -578,6 +602,23 @@ function fmtBox(b){
   return out.length? out.join(" · ") : null;
 }
 
+function addT(t,f,v){ const n=parseFloat(v); if(!isNaN(n)) t[f]=(t[f]||0)+n; }
+function computeTotals(){
+  for(const k in TOTALS) delete TOTALS[k];
+  SEASON.forEach(g=>{
+    const box=GBOX[g.id]; if(!box) return;
+    for(const key in box){
+      const b=box[key], t=TOTALS[key]=TOTALS[key]||{};
+      const ca=gv(b,"passing","C/ATT"); if(ca&&(""+ca).includes("/")){ const pr=(""+ca).split("/"); addT(t,"cmp",pr[0]); addT(t,"att",pr[1]); }
+      addT(t,"passYds",gv(b,"passing","YDS")); addT(t,"passTD",gv(b,"passing","TD")); addT(t,"int",gv(b,"passing","INT"));
+      addT(t,"rushYds",gv(b,"rushing","YDS")); addT(t,"rushTD",gv(b,"rushing","TD")); addT(t,"car",gv(b,"rushing","CAR"));
+      addT(t,"recYds",gv(b,"receiving","YDS")); addT(t,"recTD",gv(b,"receiving","TD")); addT(t,"rec",gv(b,"receiving","REC"));
+      addT(t,"tkl",gv(b,"defensive","TOT")); addT(t,"tfl",gv(b,"defensive","TFL")); addT(t,"sacks",gv(b,"defensive","SACKS")); addT(t,"dint",gv(b,"interceptions","INT"));
+      const fg=gv(b,"kicking","FG"); if(fg&&(""+fg).includes("/")) addT(t,"fgm",(""+fg).split("/")[0]);
+    }
+  });
+}
+
 async function loadSeason(fullBox){
   const sc=await j(`${BASE}/teams/${ESPN_TEAM}/schedule`);
   const evs=((sc||{}).events)||[];
@@ -606,6 +647,8 @@ async function loadSeason(fullBox){
   await Promise.all(need.map(async g=>{ const s=await j(`${BASE}/summary?event=${g.id}`); if(s) GBOX[g.id]=parseBox(s); }));
 
   SEASON.length=0; SEASON.push(...games);
+  computeTotals();
+  render();                                                                  // repaint grid so stat sorts/badges use fresh totals
   if(overlay.classList.contains("on") && curIdx!=null) openModal(curIdx);   // repaint open card
   if(liveG){ clearTimeout(liveTimer); liveTimer=setTimeout(()=>refresh(),60000); }
 }
