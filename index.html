@@ -79,6 +79,8 @@
   .meta{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5}
   .meta .sep{color:var(--line)}
   .home{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .cardstat{font-size:11.5px;color:#25303f;background:#f2f5f9;border-radius:6px;padding:4px 8px;margin-top:7px;line-height:1.4;font-weight:500}
+  .cardstat b{color:var(--gc);font-weight:700;margin-right:4px}
   .badges{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
   .b{font-size:11px;font-weight:600;border-radius:5px;padding:2px 7px;line-height:1.5}
   .b.tr{background:#fde9e0;color:#b5490f;border:1px solid #f6d2ba}
@@ -389,6 +391,7 @@ function card(p,ri){
   if(p[F.stars]) badges.push(`<span class="b star">★${p[F.stars]} HS</span>`);
   if(p[F.acc]) p[F.acc].split(" · ").forEach(a=>badges.push(`<span class="b acc">${a}</span>`));
   if(p[F.prev]) badges.push(`<span class="b tr">via ${p[F.prev]}</span>`);
+  const seasonLine=fmtTotals(TOTALS[norm(p[F.name])]);
   return `<div class="card ${dr===1?"starter":""}" style="--gc:${gc}" data-i="${ri}" tabindex="0" role="button" aria-label="${p[F.name]}, details">
     <div class="jersey">${p[F.num]}</div>
     <div class="who">
@@ -396,6 +399,7 @@ function card(p,ri){
       <div class="name">${p[F.name]}</div>
       <div class="meta">${p[F.ht]} &middot; ${p[F.wt]} lb <span class="sep">|</span> ${CLASS_FULL[p[F.cls]]||p[F.cls]}</div>
       <div class="home">${p[F.home]} &middot; ${p[F.hs]}</div>
+      ${seasonLine?`<div class="cardstat"><b>’26</b>${seasonLine}</div>`:""}
       ${badges.length?`<div class="badges">${badges.join("")}</div>`:""}
     </div>
   </div>`;
@@ -617,6 +621,28 @@ function computeTotals(){
       const fg=gv(b,"kicking","FG"); if(fg&&(""+fg).includes("/")) addT(t,"fgm",(""+fg).split("/")[0]);
     }
   });
+}
+function fmtTotals(t){
+  if(!t) return "";
+  const R=v=>Number.isInteger(v)?v:Math.round(v*10)/10, h=v=>typeof v==="number"&&v>0, out=[];
+  if(h(t.att)||h(t.passYds)){
+    const s=[]; if(h(t.att)) s.push(`${t.cmp||0}/${t.att}`); if(h(t.passYds)) s.push(`${t.passYds} pass yds`); if(h(t.passTD)) s.push(`${t.passTD} TD`); if(h(t.int)) s.push(`${t.int} INT`);
+    out.push(s.join(", "));
+  }
+  if(h(t.car)||h(t.rushYds)){
+    const s=[]; if(h(t.car)) s.push(`${t.car} car`); s.push(`${t.rushYds||0} rush yds`); if(h(t.rushTD)) s.push(`${t.rushTD} TD`);
+    out.push(s.join(", "));
+  }
+  if(h(t.rec)||h(t.recYds)){
+    const s=[]; if(h(t.rec)) s.push(`${t.rec} rec`); s.push(`${t.recYds||0} rec yds`); if(h(t.recTD)) s.push(`${t.recTD} TD`);
+    out.push(s.join(", "));
+  }
+  if(h(t.tkl)||h(t.sacks)||h(t.tfl)||h(t.dint)){
+    const s=[]; if(h(t.tkl)) s.push(`${t.tkl} tkl`); if(h(t.tfl)) s.push(`${R(t.tfl)} TFL`); if(h(t.sacks)) s.push(`${R(t.sacks)} sack`); if(h(t.dint)) s.push(`${t.dint} INT`);
+    out.push(s.join(", "));
+  }
+  if(h(t.fgm)) out.push(`${t.fgm} FG`);
+  return out.filter(Boolean).join(" · ");
 }
 
 async function loadSeason(fullBox){
