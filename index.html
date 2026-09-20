@@ -115,6 +115,7 @@
   .strow{display:grid;grid-template-columns:60px 1fr;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid var(--line)}
   .strow .yr{font-weight:700;color:var(--ink)} .strow .ln{color:var(--ink)}
   .strow.cur{background:#eef4ff;margin:0 -8px 2px;padding:8px;border-radius:7px;border-bottom:0}
+  .strow.live .yr{color:#b3261e}
   .snote{font-size:12.5px;color:var(--muted);margin-top:12px;font-style:italic}
 </style>
 </head>
@@ -171,7 +172,7 @@
 <div class="overlay" id="overlay"><div class="modal" role="dialog" aria-modal="true" aria-label="Player details"></div></div>
 
 <footer>
-  The 2026 record, live score, and each player’s current-game line load live from ESPN’s public data when the page opens (no key or setup needed); previous seasons are stored in the file. If ESPN can’t be reached, it falls back to the stored numbers.
+  The 2026 record, live score, and a full game-by-game log for every player load live from ESPN’s public data when the page opens (no key or setup) — with a separate live entry while a game is in progress; previous seasons are stored in the file. If ESPN can’t be reached, it falls back to the stored numbers.
   Roster data from the official UK Athletics roster. Slot labels use Kentucky’s 3-4/nickel scheme (JACK = edge; NB = nickel).
   ★ = verified high-school star rating; green = notable accolade where available.
   Returner = on Kentucky’s 2025 roster; New = joined in 2026 via the portal (transfer) or as a freshman. A few redshirt freshmen who were on the 2025 team are counted as returners.
@@ -440,17 +441,6 @@ const overlay=document.getElementById("overlay");
 let curIdx=null;
 const stMapM={R:["ret","Returner ’25"],T:["tr2","New: Transfer ’26"],F:["fr2","New: Freshman ’26"]};
 
-function statBlock(p){
-  const s=STATS[p[F.name]];
-  let rows=`<div class="strow cur"><span class="yr">2026</span><span class="ln" id="live2026">Kentucky — checking for live stats…</span></div>`;
-  if(s&&s.seasons&&s.seasons.length){
-    rows+=s.seasons.map(x=>`<div class="strow"><span class="yr">${x.yr}</span><span class="ln">${x.team?x.team+" — ":""}${x.line}</span></div>`).join("");
-    return {rows,note:s.note||""};
-  }
-  const note=statusOf(p)==="F"?"True freshman — no college stats yet.":"Previous-season stats aren’t loaded for this player yet.";
-  return {rows,note};
-}
-
 function openModal(i){
   const p=R[i]; if(!p) return;
   curIdx=i;
@@ -460,7 +450,28 @@ function openModal(i){
   if(p[F.acc]) p[F.acc].split(" · ").forEach(a=>badges.push(`<span class="b acc">${a}</span>`));
   const slotTxt=SHOW_SLOT.has(p[F.slot])?p[F.slot]+" · ":"";
   badges.push(`<span class="dbadge ${drClass(p[F.dr])}" style="--gc:${gc}">${slotTxt}${strLabel(p[F.dr])}</span>`);
-  const {rows,note}=statBlock(p);
+
+  // 2026 game log (built live from each game's box score) + a separate live entry
+  const key=norm(p[F.name]);
+  let liveRow="", logRows=[];
+  SEASON.forEach(g=>{
+    const line=fmtBox((GBOX[g.id]||{})[key]);
+    if(g.live){
+      liveRow=`<div class="strow cur live"><span class="yr">● LIVE</span><span class="ln">${g.ha} ${g.opp} — ${line||"no stats yet"}${g.detail?` · ${g.detail}`:""}</span></div>`;
+    } else if(line){
+      logRows.push(`<div class="strow"><span class="yr">Gm ${g.gm}</span><span class="ln">${g.ha} ${g.opp} (${g.result}) — ${line}</span></div>`);
+    }
+  });
+  const logHtml=(liveRow||logRows.length) ? liveRow+logRows.join("")
+    : `<div class="strow"><span class="yr">2026</span><span class="ln">${SEASON.length?"No stats recorded this season":"loading live data…"}</span></div>`;
+
+  // previous seasons (stored in the file, never change)
+  const sv=STATS[p[F.name]];
+  const prevRows=(sv&&sv.seasons&&sv.seasons.length)
+    ? sv.seasons.map(x=>`<div class="strow"><span class="yr">${x.yr}</span><span class="ln">${x.team?x.team+" — ":""}${x.line}</span></div>`).join("")
+    : "";
+  const prevNote=(sv&&sv.note)?sv.note:((statusOf(p)==="F"&&!prevRows)?"True freshman — no college stats yet.":"");
+
   const m=overlay.querySelector(".modal");
   m.style.setProperty("--gc",gc);
   m.innerHTML=`
@@ -473,14 +484,14 @@ function openModal(i){
     <div class="mbody">
       <div class="mrow">${p[F.home]} · ${p[F.hs]}${p[F.prev]?" · via "+p[F.prev]:""}</div>
       <div class="mbadges">${badges.join("")}</div>
-      <div class="stitle">2026 &amp; career stats</div>
-      ${rows}
-      ${note?`<div class="snote">${note}</div>`:""}
+      <div class="stitle">2026 game log</div>
+      ${logHtml}
+      ${prevRows?`<div class="stitle">Previous seasons</div>${prevRows}`:""}
+      ${prevNote?`<div class="snote">${prevNote}</div>`:""}
     </div>`;
   overlay.classList.add("on");
   document.body.style.overflow="hidden";
   m.querySelector(".mclose").onclick=closeModal;
-  fillLive(p);
 }
 function closeModal(){overlay.classList.remove("on");document.body.style.overflow="";curIdx=null;}
 overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal();});
@@ -488,11 +499,11 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 main.addEventListener("click",e=>{const c=e.target.closest(".card");if(c)openModal(+c.dataset.i);});
 main.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("card")){e.preventDefault();openModal(+e.target.dataset.i);}});
 
-/* ---------- Live data from ESPN's public endpoints (no key, loads in-browser) ----------
-   - Team record + live/last score refresh on load.
-   - Each player's current-game line comes from the box score (updates as the game is played).
-   - Uses the site.web.api host (more reliable) and degrades to stored data if unreachable. */
-const ESPN_TEAM=96, ESPN_ABBR="UK"; // Kentucky
+/* ---------- Live data from ESPN (no key, loads in-browser) ----------
+   Builds a full 2026 game-by-game log for every player from each game's box score,
+   plus a live entry for the game in progress. Uses the site.web.api host; the file
+   falls back to the stored previous-season data if ESPN is unreachable. */
+const ESPN_TEAM=96, ESPN_ABBR="UK";
 const BASE="https://site.web.api.espn.com/apis/site/v2/sports/football/college-football";
 const norm=s=>String(s||"")
   .replace(/["“”][^"“”]*["“”]/g,"")           // drop "Bo" / "CJ" style nicknames
@@ -503,61 +514,23 @@ const norm=s=>String(s||"")
 
 async function j(url){
   try{
-    const c=new AbortController(), t=setTimeout(()=>c.abort(),7000);
+    const c=new AbortController(), t=setTimeout(()=>c.abort(),8000);
     const r=await fetch(url,{signal:c.signal}); clearTimeout(t);
     return r.ok? await r.json() : null;
   }catch(e){ return null; }
 }
 
-// current-game player stats, keyed by normalized name → { passing:{labels,stats}, rushing:{…}, … }
-const BOX={};
-let gameLabel="", boxDone, liveTimer=null; const boxReady=new Promise(r=>boxDone=r);
+const SEASON=[];   // played/live games in order: {id,gm,opp,ha,uks,ops,result,detail,live,done}
+const GBOX={};     // GBOX[gameId] = { normName: {passing:{labels,stats}, …} }
+let liveTimer=null;
+const _ab=c=>((c.team&&(c.team.abbreviation||c.team.shortDisplayName))||"?");
+const _score=c=>{const s=c.score;return s&&typeof s==="object"?(s.displayValue??s.value??""):(s??"");};
+const _comp=ev=>(ev.competitions||[])[0]||{};
+const _st=ev=>((_comp(ev).status||ev.status||{}).type||{});
+const _when=ev=>new Date(ev.date||_comp(ev).date||0).getTime();
 
-async function loadTeam(){
-  const d=await j(`${BASE}/teams/${ESPN_TEAM}`);
-  const team=(d||{}).team;
-  if(team){
-    const rec=(team.record||{}).items;
-    if(Array.isArray(rec)&&rec.length){
-      const tot=rec.find(x=>x.type==="total")||rec[0];
-      const el=document.getElementById("uRecord");
-      if(el&&tot&&tot.summary) el.innerHTML=`2026: <b>${tot.summary}</b>`;
-    }
-  }
-  // find the live game, the most recent completed game, and the next upcoming game
-  const sc=await j(`${BASE}/teams/${ESPN_TEAM}/schedule`);
-  const evs=((sc||{}).events)||[];
-  const ab=c=>((c.team&&(c.team.abbreviation||c.team.shortDisplayName))||"?");
-  const scoreOf=c=>{ const s=c.score; return s&&typeof s==="object"?(s.displayValue??s.value??""):(s??""); };
-  const compOf=ev=>(ev.competitions||[])[0]||{};
-  const stOf=ev=>((compOf(ev).status||ev.status||{}).type||{});
-  const when=ev=>new Date(ev.date||compOf(ev).date||0).getTime();
-  let live=null,lastDone=null,next=null;
-  evs.forEach(ev=>{
-    const st=stOf(ev);
-    if(st.state==="in") live=ev;
-    else if(st.completed||st.state==="post"){ if(!lastDone||when(ev)>when(lastDone)) lastDone=ev; }
-    else { if(!next||when(ev)<when(next)) next=ev; }
-  });
-  const cur=live||lastDone, g=document.getElementById("uGame");
-  if(g){
-    if(cur){
-      const cs=compOf(cur).competitors||[], st=stOf(cur);
-      const line=cs.map(c=>`${ab(c)} <b>${scoreOf(c)}</b>`).join(" · ");
-      g.innerHTML=(live?"LIVE — ":"Final — ")+line+(st.shortDetail?` (${st.shortDetail})`:"");
-    } else if(next){ g.textContent="Next: "+(next.shortName||(compOf(next).competitors||[]).map(ab).join(" vs ")); }
-  }
-  if(cur){
-    const opp=(compOf(cur).competitors||[]).find(c=>ab(c)!==ESPN_ABBR);
-    gameLabel=opp?((opp.homeAway==="home"?"at ":"vs ")+ab(opp)):"2026";
-    if(cur.id) await loadBox(cur.id);
-  }
-  if(live){ clearTimeout(liveTimer); liveTimer=setTimeout(refresh,60000); }
-}
-
-async function loadBox(eventId){
-  const s=await j(`${BASE}/summary?event=${eventId}`);
-  const players=((s||{}).boxscore||{}).players||[];
+function parseBox(s){
+  const map={}, players=((s||{}).boxscore||{}).players||[];
   players.forEach(tm=>{
     const t=tm.team||{};
     if(String(t.id)!==String(ESPN_TEAM) && t.abbreviation!==ESPN_ABBR) return;
@@ -565,10 +538,11 @@ async function loadBox(eventId){
       (cat.athletes||[]).forEach(a=>{
         const ath=a.athlete||{}, key=norm(ath.displayName||ath.fullName);
         if(!key) return;
-        (BOX[key]=BOX[key]||{})[cat.name]={labels:cat.labels||[],stats:a.stats||[]};
+        (map[key]=map[key]||{})[cat.name]={labels:cat.labels||[],stats:a.stats||[]};
       });
     });
   });
+  return map;
 }
 
 function gv(b,cat,key){
@@ -577,8 +551,8 @@ function gv(b,cat,key){
   return i>=0? c.stats[i] : null;
 }
 const nz=v=>v!=null&&v!==""&&v!=="0"&&v!=="0.0"&&v!=="0/0"&&v!=="--";
-function boxLine(p){
-  const b=BOX[norm(p[F.name])]; if(!b) return null;
+function fmtBox(b){
+  if(!b) return null;
   const out=[];
   if(b.passing){
     const ca=gv(b,"passing","C/ATT"),y=gv(b,"passing","YDS"),td=gv(b,"passing","TD"),i=gv(b,"passing","INT");
@@ -604,22 +578,46 @@ function boxLine(p){
   return out.length? out.join(" · ") : null;
 }
 
-async function fillLive(p){
-  const el=document.getElementById("live2026"); if(!el) return;
-  await boxReady;
-  const ln=boxLine(p);
-  el.textContent = ln ? (`Kentucky ${gameLabel} — ${ln}`).replace("  "," ") : "Kentucky — no 2026 game stats yet";
+async function loadSeason(fullBox){
+  const sc=await j(`${BASE}/teams/${ESPN_TEAM}/schedule`);
+  const evs=((sc||{}).events)||[];
+  const games=[];
+  evs.forEach(ev=>{
+    const st=_st(ev), cs=_comp(ev).competitors||[];
+    if(cs.length<2) return;
+    const uk=cs.find(c=>_ab(c)===ESPN_ABBR), op=cs.find(c=>_ab(c)!==ESPN_ABBR);
+    if(!uk||!op) return;
+    const done=st.completed||st.state==="post", live=st.state==="in";
+    if(!done&&!live) return;                       // skip games not yet played
+    const uks=_score(uk), ops=_score(op), wl=(+uks>+ops?"W":(+uks<+ops?"L":"T"));
+    games.push({id:ev.id, date:_when(ev), opp:_ab(op), ha:(op.homeAway==="home"?"at":"vs"),
+                uks, ops, result:`${wl} ${uks}-${ops}`, detail:st.shortDetail||"", live, done});
+  });
+  games.sort((a,b)=>a.date-b.date);
+  games.forEach((g,i)=>g.gm=i+1);
+
+  const w=games.filter(g=>g.done&&g.result[0]==="W").length, l=games.filter(g=>g.done&&g.result[0]==="L").length;
+  const recEl=document.getElementById("uRecord"); if(recEl) recEl.innerHTML=`2026: <b>${w}–${l}</b>`;
+  const liveG=games.find(g=>g.live), lastG=[...games].reverse().find(g=>g.done), cur=liveG||lastG;
+  const gEl=document.getElementById("uGame");
+  if(gEl&&cur) gEl.innerHTML=(cur.live?"LIVE — ":"Final — ")+`UK <b>${cur.uks}</b> · ${cur.opp} <b>${cur.ops}</b>`+(cur.detail?` (${cur.detail})`:"");
+
+  const need = fullBox ? games : games.filter(g=>g.live);   // full load fetches every game; refresh only the live one
+  await Promise.all(need.map(async g=>{ const s=await j(`${BASE}/summary?event=${g.id}`); if(s) GBOX[g.id]=parseBox(s); }));
+
+  SEASON.length=0; SEASON.push(...games);
+  if(overlay.classList.contains("on") && curIdx!=null) openModal(curIdx);   // repaint open card
+  if(liveG){ clearTimeout(liveTimer); liveTimer=setTimeout(()=>refresh(),60000); }
 }
+
 async function refresh(){
   const btn=document.getElementById("refreshBtn"); if(btn) btn.classList.add("spin");
-  for(const k in BOX) delete BOX[k];
-  await loadTeam().catch(()=>{});
-  if(overlay.classList.contains("on") && curIdx!=null) fillLive(R[curIdx]);
+  await loadSeason(false).catch(()=>{});
   if(btn) btn.classList.remove("spin");
 }
 
 render();
-loadTeam().catch(()=>{}).finally(()=>boxDone());
+loadSeason(true).catch(()=>{});
 </script>
 </body>
 </html>
