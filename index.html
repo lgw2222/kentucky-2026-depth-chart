@@ -22,10 +22,10 @@
   html,body{margin:0}
   body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.4}
 
-  header.mast{position:relative;overflow:hidden;color:#fff;padding:30px 18px 24px;background:radial-gradient(130% 100% at 50% -20%, #21458c 0%, #0a2258 45%, #041233 100%)}
-  header.mast::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(50% 42% at 18% -8%, rgba(190,212,255,.22), transparent 62%),radial-gradient(50% 42% at 82% -8%, rgba(190,212,255,.22), transparent 62%)}
-  header.mast::after{content:"";position:absolute;left:0;right:0;bottom:0;height:48%;pointer-events:none;background:linear-gradient(to top, rgba(12,46,26,.5), transparent 85%),repeating-linear-gradient(90deg, rgba(255,255,255,.055) 0 2px, transparent 2px 66px)}
-  .mast-inner{position:relative;z-index:1;max-width:1180px;margin:0 auto}
+  header.mast{position:relative;overflow:hidden;color:#fff;padding:34px 18px 28px;isolation:isolate;background:#0a2258}
+  header.mast::before{content:"";position:absolute;inset:-14px;z-index:-2;background-image:url("https://ukathletics.com/imgproxy/dO4YUuAaGDLwHIrn4jrOw_nlCr2NpaBOgnJoLGe64hM/rs:fill:2400:1350:1:1/g:no/aHR0cHM6Ly9zdG9yYWdlLmdvb2dsZWFwaXMuY29tL3VrYXRobGV0aWNzLWNvbS8yMDI0LzA4Lzk1MDU4MzM3LWtyb2dlci1maWVsZC1zdW5zZXQtZmlyZXdvcmtzLmpwZw.jpg");background-size:cover;background-position:center 32%;filter:blur(3px) saturate(1.05) brightness(.72)}
+  header.mast::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg, rgba(4,15,44,.55) 0%, rgba(4,15,44,.28) 45%, rgba(4,15,44,.78) 100%)}
+  .mast-inner{position:relative;z-index:1;max-width:1180px;margin:0 auto;text-shadow:0 2px 8px rgba(0,0,0,.35)}
   .mast h1{font-family:var(--num);font-weight:700;letter-spacing:.5px;font-size:clamp(27px,5.6vw,44px);margin:0;line-height:.98;text-transform:uppercase}
   .mast h1 span{display:block;font-weight:400;font-size:.42em;letter-spacing:3px;color:#b9c8ee;margin-top:8px}
   .mast .facts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:16px;font-size:13.5px;color:#d7e0f6}
@@ -405,7 +405,7 @@ function card(p,ri){
   if(p[F.acc]) p[F.acc].split(" · ").forEach(a=>badges.push(`<span class="b acc">${a}</span>`));
   if(p[F.prev]) badges.push(`<span class="b tr">via ${p[F.prev]}</span>`);
   const seasonLine=fmtTotals(TOTALS[norm(p[F.name])]);
-  const url=PHOTO[norm(p[F.name])], ini=initials(p[F.name]);
+  const url=photoOf(p), ini=initials(p[F.name]);
   const avatar=`<div class="avatar"><div class="ph">${ini}</div>${url?`<img src="${url}" alt="" loading="lazy" onload="var q=this.parentElement.querySelector('.ph');if(q)q.remove()" onerror="this.remove()">`:""}</div>`;
   return `<div class="card ${dr===1?"starter":""}" style="--gc:${gc}" data-i="${ri}" tabindex="0" role="button" aria-label="${p[F.name]}, details">
     <div class="pcol">${avatar}<div class="jnum">${p[F.num]}</div></div>
@@ -515,7 +515,7 @@ function openModal(i){
     : "";
   const prevNote=(sv&&sv.note)?sv.note:((statusOf(p)==="F"&&!prevRows)?"True freshman — no college stats yet.":"");
 
-  const mUrl=PHOTO[norm(p[F.name])], mIni=initials(p[F.name]);
+  const mUrl=photoOf(p), mIni=initials(p[F.name]);
   const m=overlay.querySelector(".modal");
   m.style.setProperty("--gc",gc);
   m.innerHTML=`
@@ -569,8 +569,15 @@ const SEASON=[];   // played/live games in order: {id,gm,opp,ha,uks,ops,result,d
 const GBOX={};     // GBOX[gameId] = { normName: {passing:{labels,stats}, …} }
 const TOTALS={};   // TOTALS[normName] = { passYds, rushYds, tkl, … } summed across 2026 games
 const PHOTO={};    // PHOTO[normName] = ESPN headshot URL
+const PHOTO_OVERRIDE={};  // UK Athletics headshots — take priority over ESPN (for players ESPN has no photo of)
+[
+["Matt Ponatoski","https://ukathletics.com/imgproxy/uVfAhkYCAFyWgAjWYmomgcM8OCBtmOpuSeGNqe3Z3G0/fit/600/800/ce/0/aHR0cHM6Ly9zdG9yYWdlLmdvb2dsZWFwaXMuY29tL3VrYXRobGV0aWNzLWNvbS8yMDI1LzEyLzdkMDJkODAzLXBvbmF0b3NraV9tYXR0XzIwMjZfam4xLmpwZw.png"],
+["Callum Wither","https://ukathletics.com/imgproxy/mVmWGwXEqzSNdhrLI8v-TAYOlnjERlQA0VhJ-SUp2IE/fit/600/800/ce/0/aHR0cHM6Ly9zdG9yYWdlLmdvb2dsZWFwaXMuY29tL3VrYXRobGV0aWNzLWNvbS8yMDI2LzA3Lzk2ZjVjZjBlLXdpdGhlcmNhbGx1bV8yMDI2ZWgwNS1zY2FsZWQuanBn.png"],
+["Malachi Wood","https://ukathletics.com/imgproxy/imf-_6s7CMqQOpJOCBlDhkLXV99jDpjqkI-6l5nFX1I/fit/600/800/ce/0/aHR0cHM6Ly9zdG9yYWdlLmdvb2dsZWFwaXMuY29tL3VrYXRobGV0aWNzLWNvbS8yMDIyLzEyLzM0ZTkyNTIzLXdvb2RtYWxhY2hpXzIwMjZlaDA0LXNjYWxlZC5qcGc.png"],
+].forEach(([n,u])=>{ PHOTO_OVERRIDE[norm(n)]=u; });
+function photoOf(p){ const k=norm(p[F.name]); return PHOTO_OVERRIDE[k]||PHOTO[k]||""; }
 let liveTimer=null;
-function initials(name){ const w=String(name).replace(/[^A-Za-z ]/g,"").trim().split(/\s+/).filter(Boolean); return ((w[0]&&w[0][0]||"")+(w.length>1?w[w.length-1][0]:"")).toUpperCase(); }
+function initials(name){ const w=String(name).replace(/[^A-Za-z ]/g,"").trim().split(/\s+/).filter(x=>x&&!/^(jr|sr|ii|iii|iv)$/i.test(x)); return ((w[0]&&w[0][0]||"")+(w.length>1?w[w.length-1][0]:"")).toUpperCase(); }
 const XICON="<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/></svg>";
 const IGICON="<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zm0 1.44c-3.14 0-3.52.01-4.76.07-.9.04-1.39.19-1.71.32-.43.17-.74.37-1.06.69-.32.32-.52.63-.69 1.06-.13.32-.28.81-.32 1.71-.06 1.24-.07 1.62-.07 4.76s.01 3.52.07 4.76c.04.9.19 1.39.32 1.71.17.43.37.74.69 1.06.32.32.63.52 1.06.69.32.13.81.28 1.71.32 1.24.06 1.62.07 4.76.07s3.52-.01 4.76-.07c.9-.04 1.39-.19 1.71-.32.43-.17.74-.37 1.06-.69.32-.32.52-.63.69-1.06.13-.32.28-.81.32-1.71.06-1.24.07-1.62.07-4.76s-.01-3.52-.07-4.76c-.04-.9-.19-1.39-.32-1.71-.17-.43-.37-.74-.69-1.06-.32-.32-.63-.52-1.06-.69-.32-.13-.81-.28-1.71-.32-1.24-.06-1.62-.07-4.76-.07zm0 3.68a4.72 4.72 0 110 9.44 4.72 4.72 0 010-9.44zm0 7.78a3.06 3.06 0 100-6.12 3.06 3.06 0 000 6.12zm6.01-7.96a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z'/></svg>";
 const SOCIAL={};
