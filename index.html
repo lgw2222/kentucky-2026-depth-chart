@@ -22,8 +22,10 @@
   html,body{margin:0}
   body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.4}
 
-  header.mast{background:linear-gradient(160deg,var(--uk) 0%,var(--uk-dark) 100%);color:#fff;padding:26px 18px 20px}
-  .mast-inner{max-width:1180px;margin:0 auto}
+  header.mast{position:relative;overflow:hidden;color:#fff;padding:30px 18px 24px;background:radial-gradient(130% 100% at 50% -20%, #21458c 0%, #0a2258 45%, #041233 100%)}
+  header.mast::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(50% 42% at 18% -8%, rgba(190,212,255,.22), transparent 62%),radial-gradient(50% 42% at 82% -8%, rgba(190,212,255,.22), transparent 62%)}
+  header.mast::after{content:"";position:absolute;left:0;right:0;bottom:0;height:48%;pointer-events:none;background:linear-gradient(to top, rgba(12,46,26,.5), transparent 85%),repeating-linear-gradient(90deg, rgba(255,255,255,.055) 0 2px, transparent 2px 66px)}
+  .mast-inner{position:relative;z-index:1;max-width:1180px;margin:0 auto}
   .mast h1{font-family:var(--num);font-weight:700;letter-spacing:.5px;font-size:clamp(27px,5.6vw,44px);margin:0;line-height:.98;text-transform:uppercase}
   .mast h1 span{display:block;font-weight:400;font-size:.42em;letter-spacing:3px;color:#b9c8ee;margin-top:8px}
   .mast .facts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:16px;font-size:13.5px;color:#d7e0f6}
@@ -58,7 +60,16 @@
 
   .card{position:relative;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--gc);border-radius:11px;padding:12px 13px 12px 14px;display:flex;gap:12px;align-items:flex-start;min-height:96px}
   .card.starter{box-shadow:inset 0 0 0 1px var(--gc)}
-  .jersey{font-family:var(--num);font-weight:700;line-height:.85;font-size:40px;color:var(--gc);min-width:46px;text-align:center;letter-spacing:-1px}
+  .pcol{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:52px}
+  .avatar{position:relative;width:52px;height:52px;border-radius:50%;overflow:hidden;background:#e9edf3;border:2px solid var(--gc);flex:0 0 auto}
+  .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .avatar .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--num);font-weight:700;color:var(--gc);font-size:18px}
+  .jnum{font-family:var(--num);font-weight:700;font-size:19px;color:var(--gc);line-height:1;letter-spacing:-.5px}
+  .socials{display:flex;gap:8px;margin-top:8px}
+  .socials a{display:inline-flex;width:27px;height:27px;align-items:center;justify-content:center;border-radius:7px;background:#f1f4f8;color:#39434f;border:1px solid var(--line);text-decoration:none}
+  .socials a:hover{background:var(--gc);color:#fff;border-color:var(--gc)}
+  .socials svg{width:15px;height:15px;fill:currentColor;display:block}
+  .mbody .socials{margin-top:14px}
   .who{min-width:0;flex:1}
   .toprow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
   .dbadge{font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 7px;letter-spacing:.3px;white-space:nowrap}
@@ -91,7 +102,7 @@
   footer{max-width:1180px;margin:0 auto;padding:0 18px 40px;color:var(--muted);font-size:12px}
   @media (max-width:520px){
     .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px}
-    .jersey{font-size:33px;min-width:38px}
+    .avatar{width:44px;height:44px} .pcol{min-width:44px} .jnum{font-size:17px}
     .card{padding:11px;gap:9px}
     .name{font-size:14px}
     .count{width:100%;margin-left:0;text-align:right}
@@ -104,7 +115,9 @@
   .modal{background:#fff;width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:16px 16px 0 0}
   @media(min-width:560px){.overlay{align-items:center}.modal{border-radius:16px}}
   .mhead{position:sticky;top:0;color:#fff;padding:16px 18px;display:flex;gap:14px;align-items:center}
-  .mhead .mj{font-family:var(--num);font-weight:700;font-size:46px;line-height:.8;min-width:52px;text-align:center}
+  .mhead .mav{position:relative;width:58px;height:58px;border-radius:50%;overflow:hidden;background:rgba(255,255,255,.92);border:2px solid rgba(255,255,255,.7);flex:0 0 auto}
+  .mhead .mav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .mhead .mav .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--num);font-weight:700;color:var(--gc);font-size:22px}
   .mhead .mn{font-weight:700;font-size:20px;line-height:1.12}
   .mhead .mp{font-size:12.5px;opacity:.92;margin-top:4px}
   .mclose{margin-left:auto;background:rgba(255,255,255,.22);border:0;color:#fff;font-size:22px;line-height:1;width:34px;height:34px;border-radius:8px;cursor:pointer;flex:0 0 auto}
@@ -392,8 +405,10 @@ function card(p,ri){
   if(p[F.acc]) p[F.acc].split(" · ").forEach(a=>badges.push(`<span class="b acc">${a}</span>`));
   if(p[F.prev]) badges.push(`<span class="b tr">via ${p[F.prev]}</span>`);
   const seasonLine=fmtTotals(TOTALS[norm(p[F.name])]);
+  const url=PHOTO[norm(p[F.name])], ini=initials(p[F.name]);
+  const avatar=`<div class="avatar"><div class="ph">${ini}</div>${url?`<img src="${url}" alt="" loading="lazy" onload="var q=this.parentElement.querySelector('.ph');if(q)q.remove()" onerror="this.remove()">`:""}</div>`;
   return `<div class="card ${dr===1?"starter":""}" style="--gc:${gc}" data-i="${ri}" tabindex="0" role="button" aria-label="${p[F.name]}, details">
-    <div class="jersey">${p[F.num]}</div>
+    <div class="pcol">${avatar}<div class="jnum">${p[F.num]}</div></div>
     <div class="who">
       <div class="toprow">${depthBadge}${statusBadge}${statBadge}</div>
       <div class="name">${p[F.name]}</div>
@@ -401,6 +416,7 @@ function card(p,ri){
       <div class="home">${p[F.home]} &middot; ${p[F.hs]}</div>
       ${seasonLine?`<div class="cardstat"><b>’26</b>${seasonLine}</div>`:""}
       ${badges.length?`<div class="badges">${badges.join("")}</div>`:""}
+      ${socialHtml(p)}
     </div>
   </div>`;
 }
@@ -499,18 +515,20 @@ function openModal(i){
     : "";
   const prevNote=(sv&&sv.note)?sv.note:((statusOf(p)==="F"&&!prevRows)?"True freshman — no college stats yet.":"");
 
+  const mUrl=PHOTO[norm(p[F.name])], mIni=initials(p[F.name]);
   const m=overlay.querySelector(".modal");
   m.style.setProperty("--gc",gc);
   m.innerHTML=`
     <div class="mhead" style="background:${gc}">
-      <div class="mj">${p[F.num]}</div>
+      <div class="mav"><div class="ph">${mIni}</div>${mUrl?`<img src="${mUrl}" alt="" onload="var q=this.parentElement.querySelector('.ph');if(q)q.remove()" onerror="this.remove()">`:""}</div>
       <div><div class="mn">${p[F.name]}</div>
-        <div class="mp">${p[F.pos]} · ${p[F.ht]} · ${p[F.wt]} lb · ${CLASS_FULL[p[F.cls]]||p[F.cls]}</div></div>
+        <div class="mp">#${p[F.num]} · ${p[F.pos]} · ${p[F.ht]} · ${p[F.wt]} lb · ${CLASS_FULL[p[F.cls]]||p[F.cls]}</div></div>
       <button class="mclose" aria-label="Close">&times;</button>
     </div>
     <div class="mbody">
       <div class="mrow">${p[F.home]} · ${p[F.hs]}${p[F.prev]?" · via "+p[F.prev]:""}</div>
       <div class="mbadges">${badges.join("")}</div>
+      ${socialHtml(p)}
       <div class="stitle">2026 game log</div>
       ${logHtml}
       ${prevRows?`<div class="stitle">Previous seasons</div>${prevRows}`:""}
@@ -550,7 +568,67 @@ async function j(url){
 const SEASON=[];   // played/live games in order: {id,gm,opp,ha,uks,ops,result,detail,live,done}
 const GBOX={};     // GBOX[gameId] = { normName: {passing:{labels,stats}, …} }
 const TOTALS={};   // TOTALS[normName] = { passYds, rushYds, tkl, … } summed across 2026 games
+const PHOTO={};    // PHOTO[normName] = ESPN headshot URL
 let liveTimer=null;
+function initials(name){ const w=String(name).replace(/[^A-Za-z ]/g,"").trim().split(/\s+/).filter(Boolean); return ((w[0]&&w[0][0]||"")+(w.length>1?w[w.length-1][0]:"")).toUpperCase(); }
+const XICON="<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/></svg>";
+const IGICON="<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zm0 1.44c-3.14 0-3.52.01-4.76.07-.9.04-1.39.19-1.71.32-.43.17-.74.37-1.06.69-.32.32-.52.63-.69 1.06-.13.32-.28.81-.32 1.71-.06 1.24-.07 1.62-.07 4.76s.01 3.52.07 4.76c.04.9.19 1.39.32 1.71.17.43.37.74.69 1.06.32.32.63.52 1.06.69.32.13.81.28 1.71.32 1.24.06 1.62.07 4.76.07s3.52-.01 4.76-.07c.9-.04 1.39-.19 1.71-.32.43-.17.74-.37 1.06-.69.32-.32.52-.63.69-1.06.13-.32.28-.81.32-1.71.06-1.24.07-1.62.07-4.76s-.01-3.52-.07-4.76c-.04-.9-.19-1.39-.32-1.71-.17-.43-.37-.74-.69-1.06-.32-.32-.63-.52-1.06-.69-.32-.13-.81-.28-1.71-.32-1.24-.06-1.62-.07-4.76-.07zm0 3.68a4.72 4.72 0 110 9.44 4.72 4.72 0 010-9.44zm0 7.78a3.06 3.06 0 100-6.12 3.06 3.06 0 000 6.12zm6.01-7.96a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z'/></svg>";
+const SOCIAL={};
+[
+["Elijah \"Bo\" Barnes","ElijahBobarnes1","elijahbobarnes"],["Martels Carter Jr.","MartelsJr","ldg.mj4"],
+["CJ Baxter","c4era_","c4era"],["Andre Clarke Jr.","AndreClarkeJr3","dreclxrke"],
+["Jovantae Barnes","vontaeeb","vontaewho"],["Sam Greene","1kSamGreene","1samgreene"],
+["Aaron Gates","aarongates00","jackboy__ag"],["Kenny Minchey","kenny_minchey","kennyminchey"],
+["Nic Anderson","nicanderson04","nicanderson04"],["Antwan Smith","Antwansmith25","only1.smitty"],
+["Jordan Castell","Jordan_castell","jcastell5"],["Ja'Kayden Ferguson","jakayden_","j.akayden"],
+["Ahmad Breaux","breaux_ahmad","geauxbreauxx"],["Shane Carr","s2droppinyouoff","shanecarr.2"],
+["Jamarrion Harkless","JamarrionHarkl2","chops97_"],["DJ Miller","dejerrianmiller","dejerrian"],
+["Lorenzo Cowan","LorenzoCowan10","purposely.z0"],["Mikkel Skinner","kelzontop","kelzontop"],
+["Matt Ponatoski","mattponatoski","matt.ponatoski"],["Dyllon Williams","Williams2Dyllon","dyllonxwilliams"],
+["Braxton Urquhart","BraxtonUrquhart","braxxsteez"],["Lincoln Watkins","LinkWatkins2026","lincolnwatkins_"],
+["Brock Coffman","CoffmanBrock","brock_coffman_"],["Hasaan Sykes","hasaansykes","hasaannsykes"],
+["Denairius Gray","xklvsive_1","denairius1gray_"],["Cyrus Reyes","cyrusreyes_","cyrusreyes__"],
+["Ty Bryant","Ty_Bryant32","ty__bryant"],["Brennen Ward","brennenward4","ward.brennen"],
+["Carson Cruver","CarsonCruver","ccruver3"],["Cedric \"CJ\" Works","CedricWorks","cjwrks"],
+["Jesse Anderson III","JesseAnderson05","jesseanderson.3"],["JacQai Long","JacqaiL","jacqai_"],
+["Justyn Hartley","Justyn_Jd","thejustynhartley"],["Xavier Daisy","XavierDaisy2024","xav1er_4"],
+["Mark Manfred III","markmanfred13","markmanfrrd"],["Kenny Darby","kennydarby3_","kennydarby1"],
+["Kevis Thomas","","kevislavan"],["Terhyon Nichols","NicholsT24","rhynichols_"],
+["Nasir Addison","AddisonNasir","nasaddison"],["Tovani Mizell","TovaniMizell","tovanimizell"],
+["Delvecchio Alston II","Delvecchio2026","deucealston"],["Grant Godfrey","GrantGodfrey3","grantgodfrey_"],
+["Brian Robinson","BRob_2323","b_rob2323"],["Jaden Smith","","_j4smith"],
+["Tavion Wallace","tavion_wallace","tavion_wallace"],["Jason Patterson","JPatterson_5","jasonpatterson__"],
+["Andrew Purcell","Purcell_4","purcell_andrew4"],["Isaiah McMillian","26isaiahmcm","isaiah_mcmillian3"],
+["Demarcus Gardner","KgMarc","dgardner8k"],["Grant Grayton","GraytonGrant","grantgrayton"],
+["Quintavion Norman","Focused_5","luhkquin1k"],["Devin Smith","datboy_dd","devvv._.nosocial"],
+["Rico Crowder","rico_crowderjr","ricocrowderjr"],["Andrew Weber","AndrewWeber_20","andrewweber4"],
+["Spencer Leadbetter","spencerlead5","spencerleadbetter"],["Saxton Howard","SaxtonHoward11","saxtonhoward11"],
+["Cole Marszalek","Cole_Marsz","colemarszalek"],["Justin Kattus","KattusJustin","justin_kattus"],
+["Spencer Radnoti","SpencerRadnoti","spencer.radnoti"],["Thomas O'Hara","Thomas_ohara03","_thomasohara_"],
+["Max Anderson","MaxAnders0n1","b1gmax_"],["Cameron Miller Jr.","CameronMiller77","pudahh_"],
+["Lance Heard","lanceheard2","lance_heard53"],["Ben Reeves","benreeves53","ben_reeves21"],
+["Aba Selm","abaselm1","abaselm1"],["Jordan Knox","JordanKnox75",""],
+["Jason Ekperuoh","JasonXIIV","jay_ekperuoh"],["Ben Myers","benmyers73","ben_myers13"],
+["Tino Merlo","tmassmerlo","tinomerlo_"],["Mark Robinson","MarkRob2023",""],
+["Alexander DiMartino","Alex_Dimartino3",""],["Rob Fogler","fogler_","robfogler"],
+["Malachi Wood","_BIGMAL_67","_bigmal_67"],["Coleton Price","PriceColeton","cprice_72"],
+["Olaus Alinen","alinen_olaus","olausalinen"],["Jermiel Atkins Jr.","JermielAtkins","jermiel.atkins"],
+["Hayes Johnson","hjohnson_71","hayesjohnson_71"],["Tegra Tshabola","tshabola_tegra","513.teg"],
+["Cameron Jones","darealcamjones","darealcamjones"],["Jay Clark","ClarkJayden78","jayclrk00"],
+["Ashton Cozart","Ashton_Cozart25","ashtoncozart"],["Willie Rodriguez","w_rodriguez10","willie_rodriguez10"],
+["Prince Jean","pr11ncej1","pr11nce._"],["Davis McCray","DavisMccray2026","davis.mccray"],
+["Elijah Brown","eb_knows","eb_knows"],["Henry Boyer","henryboyer17","henryb0yer"],
+["Adam Zouagui","adam43520937","adam_zouagui"],["Mi'Quise Humphrey-Grace","GraceQuise","miquisegrace"],
+["Jacob Kauwe","JacobKauwe16","jacobkauwe16"],["Jaden Williams","jadenc_williams","jadenwilliamss_"],
+["Ben Duncum","ben_duncum","ben_duncum"],["Wilson Berry","Wilsonberry61","bangersberry"],
+["Kalen Edwards","KalenEdwards4","kalen.edwards4"],["Tavion Gadson","tavion_gadson","heartless_jh1t"],
+["Dominic Wiseman","dominicwiseman1","dwise92"],["Tyler Thomas","tylerthomas2023","ty_thomas34"],
+].forEach(([n,x,ig])=>{ SOCIAL[norm(n)]={x:x?`https://x.com/${x}`:"",ig:ig?`https://www.instagram.com/${ig}/`:""}; });
+function socialHtml(p){
+  const s=SOCIAL[norm(p[F.name])]; if(!s||(!s.x&&!s.ig)) return "";
+  const a=(href,label,icon)=>`<a href="${href}" target="_blank" rel="noopener" aria-label="${label}" onclick="event.stopPropagation()">${icon}</a>`;
+  return `<div class="socials">${s.x?a(s.x,"X",XICON):""}${s.ig?a(s.ig,"Instagram",IGICON):""}</div>`;
+}
 const _ab=c=>((c.team&&(c.team.abbreviation||c.team.shortDisplayName))||"?");
 const _score=c=>{const s=c.score;return s&&typeof s==="object"?(s.displayValue??s.value??""):(s??"");};
 const _comp=ev=>(ev.competitions||[])[0]||{};
@@ -685,7 +763,20 @@ async function refresh(){
   if(btn) btn.classList.remove("spin");
 }
 
+async function loadRoster(){
+  const d=await j(`${BASE}/teams/${ESPN_TEAM}/roster`);
+  const groups=(d||{}).athletes||[], flat=[];
+  groups.forEach(g=>{ if(g&&Array.isArray(g.items)) g.items.forEach(a=>flat.push(a)); else if(g&&g.id) flat.push(g); });
+  flat.forEach(a=>{
+    if(!a) return; const key=norm(a.fullName||a.displayName); if(!key) return;
+    const href=(a.headshot&&a.headshot.href) || (a.id?`https://a.espncdn.com/i/headshots/college-football/players/full/${a.id}.png`:"");
+    if(href) PHOTO[key]=href;
+  });
+  render();   // repaint with photos
+}
+
 render();
+loadRoster().catch(()=>{});
 loadSeason(true).catch(()=>{});
 </script>
 </body>
