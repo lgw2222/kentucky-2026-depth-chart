@@ -220,6 +220,37 @@
   .hlb:focus-visible{outline:2px solid var(--uk);outline-offset:2px}
   .hlb.off{background:var(--uk);color:#fff;border-color:var(--uk)} .hlb.off.yt svg{fill:#fff}
   .mbody .hl{padding:12px 0 0;border-top:0}
+  /* ---------- Full box score ---------- */
+  .gcsearch{position:relative;margin:4px 0 8px}
+  .gcsearch svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;fill:var(--muted);pointer-events:none}
+  .gcsearch input{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px 12px 10px 36px;font:15px var(--sans);color:var(--ink)}
+  .gcsearch input:focus{outline:2px solid var(--uk);border-color:var(--uk)}
+  .gtabs{display:flex;gap:4px;margin:0 16px;padding:4px;background:#eef1f5;border-radius:10px}
+  .gtabs button{flex:1;border:0;background:none;border-radius:7px;padding:8px 10px;font:600 13.5px var(--sans);color:var(--muted);cursor:pointer}
+  .gtabs button[aria-selected="true"]{background:#fff;color:var(--uk);box-shadow:0 1px 2px rgba(16,21,31,.12)}
+  .gtabs button:focus-visible,.bxside button:focus-visible{outline:2px solid var(--uk);outline-offset:1px}
+  .tpane{padding-top:6px}
+  .bxside{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px 2px}
+  .bxside button{border:1.5px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:5px 12px;font:600 12.5px var(--sans);cursor:pointer}
+  .bxside button[aria-pressed="true"]{background:var(--uk);border-color:var(--uk);color:#fff}
+  #fbxBody{padding:0 16px 16px}
+  .bxcat h3{font-family:var(--num);text-transform:uppercase;letter-spacing:1px;font-size:14px;font-weight:600;margin:16px 0 6px;padding-bottom:5px;border-bottom:2px solid var(--uk);color:var(--ink)}
+  .bxpair{display:grid;gap:12px}
+  .bxh{font-size:12.5px;font-weight:700;margin:2px 0 4px;color:var(--ink)}
+  .bxh .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px}
+  .bxscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:9px}
+  .bxscroll table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+  .bxscroll th{background:#f4f6f9;color:var(--muted);font-weight:600;font-size:11.5px;padding:6px 8px;text-align:right;white-space:nowrap;cursor:help}
+  .bxscroll td{padding:6px 8px;text-align:right;white-space:nowrap;border-top:1px solid var(--line)}
+  .bxscroll th:first-child,.bxscroll td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:1;min-width:150px;box-shadow:1px 0 0 var(--line)}
+  .bxscroll th:first-child{background:#f4f6f9}
+  .bxscroll .lname,.bxscroll .bxn{display:inline;width:auto;font-size:12.5px}
+  .bxscroll .bxn{font-weight:600}
+  .bxj{display:inline-block;min-width:28px;color:var(--muted);font-size:11.5px;font-weight:600}
+  .bxscroll tr.tot td{font-weight:700;background:#f8fafc}
+  .bxscroll tr.tot td:first-child{background:#f8fafc}
+  @media (min-width:900px){ .bxcat.two .bxpair{grid-template-columns:1fr 1fr} }
+  @media (max-width:520px){ .bxscroll th:first-child,.bxscroll td:first-child{min-width:128px} #fbxBody{padding:0 12px 14px} }
 </style>
 </head>
 <body>
@@ -246,6 +277,10 @@
   </div>
   <div class="gc-body" id="gcBody">
     <div class="sched" id="sched" role="group" aria-label="Choose a game"></div>
+    <div class="gcsearch">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+      <input id="fbxQ" type="search" placeholder="Search players by name or #" autocomplete="off" aria-label="Search players in this game's box score">
+    </div>
     <div id="board"></div>
   </div>
 </section>
@@ -1001,7 +1036,12 @@ function parseGame(s){
     o.id=o.id||t.id; o.abbr=o.abbr||t.abbreviation||""; o.name=o.name||t.location||t.displayName||o.abbr;
     o.logo=o.logo||t.logo||""; o.colors.push(t.color,t.alternateColor);
   });
-  (bx.players||[]).forEach(tm=>{ g[_isUK(tm.team)?"uk":"op"].leaders=_leaders(tm.statistics); });
+  (bx.players||[]).forEach(tm=>{
+    const o=g[_isUK(tm.team)?"uk":"op"];
+    o.leaders=_leaders(tm.statistics);
+    o.cats=(tm.statistics||[]).map(c=>({name:c.name, labels:c.labels||[], desc:c.descriptions||[], totals:c.totals||[],
+      ath:(c.athletes||[]).map(a=>{ const at=a.athlete||{}; return {name:at.displayName||at.fullName||"", jersey:at.jersey||"", pos:((at.position||{}).abbreviation)||"", stats:a.stats||[]}; })}));
+  });
   g.uk.logo=g.uk.logo||LOGO(ESPN_TEAM); g.op.logo=g.op.logo||LOGO(g.op.id);
   g.opc=pickOppColor(g.op.colors); g.opt=textTone(g.opc);
   g.rz=_redZone(s);
@@ -1089,9 +1129,23 @@ function boardHtml(game,g){
     </div>
     ${lineScoreHtml(g)}
     ${gameHlHtml(game,g)}
-    <div class="bgrid">
-      <div class="tstats">${statRows(g)||`<div class="gcmsg" style="border:0">Team stats aren’t posted for this game yet.</div>`}</div>
-      ${leadersHtml(g)}
+    <div class="gtabs" role="tablist" aria-label="Box score view">
+      <button type="button" role="tab" data-tab="team" aria-selected="${gcTab==="team"}">Team stats</button>
+      <button type="button" role="tab" data-tab="box" aria-selected="${gcTab==="box"}">Full box score</button>
+    </div>
+    <div class="tpane" data-pane="team" ${gcTab==="team"?"":"hidden"}>
+      <div class="bgrid">
+        <div class="tstats">${statRows(g)||`<div class="gcmsg" style="border:0">Team stats aren’t posted for this game yet.</div>`}</div>
+        ${leadersHtml(g)}
+      </div>
+    </div>
+    <div class="tpane" data-pane="box" ${gcTab==="box"?"":"hidden"}>
+      <div class="bxside" role="group" aria-label="Show team">
+        <button type="button" data-side="both" aria-pressed="${gcSide==="both"}">Both teams</button>
+        <button type="button" data-side="uk" aria-pressed="${gcSide==="uk"}">${g.uk.abbr||"UK"}</button>
+        <button type="button" data-side="op" aria-pressed="${gcSide==="op"}">${g.op.abbr||"Opponent"}</button>
+      </div>
+      <div id="fbxBody">${fullBoxHtml(g)}</div>
     </div>
   </div>`;
 }
@@ -1129,6 +1183,66 @@ function nextChip(){
     ${g.oppLogo?`<img src="${g.oppLogo}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;nologo&quot;></span>'">`:`<span class="nologo"></span>`}
     <span class="go">Next · ${g.ha} ${g.opp}</span><span class="gr">${when}</span></div>`;
 }
+
+
+/* ---------- Full box score: every player, every category, both teams ---------- */
+let gcTab="team", gcSide="both", gcQ="";
+const CAT_ORDER=["passing","rushing","receiving","fumbles","defensive","interceptions","kickReturns","puntReturns","kicking","punting"];
+const CAT_NAME={passing:"Passing",rushing:"Rushing",receiving:"Receiving",fumbles:"Fumbles",defensive:"Defense",interceptions:"Interceptions",
+  kickReturns:"Kick returns",puntReturns:"Punt returns",kicking:"Kicking",punting:"Punting"};
+const _esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function _qMatch(a,q){
+  if(!q) return true;
+  if(/^\d+$/.test(q)) return String(a.jersey)===q;
+  return norm(a.name).includes(norm(q));
+}
+function fullBoxHtml(g){
+  const q=gcQ.trim(), sides=gcSide==="both"?["uk","op"]:[gcSide];
+  const names=[...CAT_ORDER];
+  sides.forEach(sd=>(g[sd].cats||[]).forEach(c=>{ if(!names.includes(c.name)) names.push(c.name); }));
+  let shown=0;
+  const html=names.map(cn=>{
+    const tables=sides.map(sd=>{
+      const o=g[sd], c=(o.cats||[]).find(x=>x.name===cn); if(!c) return "";
+      const rows=c.ath.filter(a=>_qMatch(a,q));
+      if(!rows.length) return "";
+      shown+=rows.length;
+      const col=sd==="uk"?"var(--uk)":g.opc;
+      const body=rows.map(a=>{
+        const idx=sd==="uk"?NAME_IDX[norm(a.name)]:undefined;
+        const nm=idx!=null?`<button class="lname" type="button" data-p="${idx}">${_esc(a.name)}</button>`:`<span class="bxn">${_esc(a.name)}</span>`;
+        return `<tr><td><span class="bxj">${a.jersey?"#"+_esc(a.jersey):""}</span>${nm}</td>${c.labels.map((_,i)=>`<td>${_esc(a.stats[i]??"–")}</td>`).join("")}</tr>`;
+      }).join("");
+      const tot=(!q&&c.totals&&c.totals.some(v=>v!==""&&v!=null))?`<tr class="tot"><td>Team</td>${c.labels.map((_,i)=>`<td>${_esc(c.totals[i]??"")}</td>`).join("")}</tr>`:"";
+      return `<div class="bxt"><div class="bxh"><span class="dot" style="background:${col}"></span>${_esc(o.name||o.abbr)}</div>
+        <div class="bxscroll"><table><thead><tr><th>Player</th>${c.labels.map((l,i)=>`<th title="${_esc(c.desc[i]||l)}">${_esc(l)}</th>`).join("")}</tr></thead>
+        <tbody>${body}${tot}</tbody></table></div></div>`;
+    }).join("");
+    return tables?`<section class="bxcat ${sides.length===2?"two":""}"><h3>${CAT_NAME[cn]||_esc(cn)}</h3><div class="bxpair">${tables}</div></section>`:"";
+  }).join("");
+  if(shown) return html;
+  if(q) return `<div class="gcmsg" style="border:0">No players in this game match “${_esc(q)}”. Try a last name or jersey number.</div>`;
+  return `<div class="gcmsg" style="border:0">Player stats aren’t posted for this game yet.</div>`;
+}
+function renderFbx(){
+  const el=document.getElementById("fbxBody"), g=GTEAM[gcSel];
+  if(el&&g) el.innerHTML=fullBoxHtml(g);
+}
+function setTab(t){
+  gcTab=t;
+  document.querySelectorAll("#board .gtabs [data-tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  document.querySelectorAll("#board .tpane").forEach(p=>p.hidden=p.dataset.pane!==t);
+}
+document.getElementById("board").addEventListener("click",e=>{
+  const t=e.target.closest("[data-tab]"); if(t){ setTab(t.dataset.tab); return; }
+  const sd=e.target.closest("[data-side]");
+  if(sd){ gcSide=sd.dataset.side; document.querySelectorAll("#board [data-side]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.side===gcSide)); renderFbx(); }
+});
+document.getElementById("fbxQ").addEventListener("input",e=>{
+  gcQ=e.target.value;
+  if(gcQ.trim() && gcTab!=="box") setTab("box");
+  renderFbx();
+});
 
 document.getElementById("sched").addEventListener("click",e=>{
   const b=e.target.closest(".gchip[data-g]"); if(!b) return;
