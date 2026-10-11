@@ -281,6 +281,21 @@
   .igempty{color:var(--muted);font-size:14px;text-align:center;padding:24px 8px}
   .igact a:focus-visible,.igfilt button:focus-visible,.iglbtn:focus-visible{outline:2px solid #e1306c;outline-offset:2px}
   @media (min-width:520px){ .igrow{grid-template-columns:1fr auto auto} .igchk{grid-column:auto} }
+  .igsaw{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:600 12.5px var(--sans);color:var(--ink);background:#fff;cursor:pointer;white-space:nowrap}
+  .igsaw em{font-style:normal;background:#fde7f0;color:#c21d58;border-radius:999px;padding:0 6px;margin-left:3px;font-size:11.5px}
+  .igsaw.just{background:#e1306c;border-color:#e1306c;color:#fff}
+  .igsaw:focus-visible{outline:2px solid #e1306c;outline-offset:2px}
+  .iglk{border:1.5px solid #f3c1d4;background:#fff7fa;border-radius:12px;padding:10px 12px;margin-bottom:12px}
+  .iglkh{font-family:var(--num);text-transform:uppercase;letter-spacing:1px;font-size:14px;font-weight:600;color:#c21d58}
+  .iglkh span{font-family:var(--sans);text-transform:none;letter-spacing:0;font-size:12px;color:var(--muted);font-weight:600;margin-left:6px}
+  .iglkp{font-size:13px;color:var(--muted);margin:6px 0 2px;line-height:1.45}
+  .iglkr{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #f6d7e3}
+  .iglkr:last-of-type{border-bottom:0}
+  .iglkr a.w{border:1px solid #e1306c;color:#c21d58;border-radius:8px;padding:6px 10px;font:600 12.5px var(--sans);text-decoration:none;background:#fff}
+  .iglv{font-size:11px;font-weight:700;border-radius:999px;padding:3px 8px}
+  .iglv.high{background:#e1306c;color:#fff} .iglv.medium{background:#fde7f0;color:#c21d58} .iglv.low{background:#eef1f5;color:var(--muted)}
+  .iglkf{font-size:11.5px;color:var(--muted);margin:6px 0 0}
+  @media (max-width:420px){ .igrow{grid-template-columns:1fr} .igact{flex-wrap:wrap} }
 </style>
 </head>
 <body>
@@ -387,6 +402,7 @@
       </ol>
       <p>Anyone you follow who’s live also shows first in your Stories row with a red <b>LIVE</b> label. Tap <b>Watch</b> here to jump straight to a player’s stream.</p>
     </details>
+    <div id="igLikely"></div>
     <input id="igQ" class="igq" type="search" placeholder="Search players" autocomplete="off" aria-label="Search players">
     <div class="igfilt" role="group" aria-label="Filter">
       <button type="button" data-f="todo" aria-pressed="true">Not set up</button>
@@ -1324,6 +1340,58 @@ document.getElementById("board").addEventListener("click",e=>{
   const KEY="ukdc-iglive";
   let done={}; try{ done=JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){}
   const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(done)); }catch(e){} };
+  // Live history you log yourself ("Saw live"), used to rank who's most likely live at this time
+  const LKEY="ukdc-iglive-log";
+  let logs={}; try{ logs=JSON.parse(localStorage.getItem(LKEY)||"{}")||{}; }catch(e){}
+  const saveLogs=()=>{ try{ localStorage.setItem(LKEY,JSON.stringify(logs)); }catch(e){} };
+  const RECENT=2*3600e3;
+  const lastLog=h=>{ const a=logs[h]||[]; return a.length?a[a.length-1]:0; };
+  function sawBtn(h){
+    const n=(logs[h]||[]).length, fresh=Date.now()-lastLog(h)<RECENT;
+    return `<button type="button" class="igsaw ${fresh?"just":""}" data-saw="${h}" title="${fresh?"Undo the live you just logged":"Log that he's live right now"}">${fresh?"Logged · undo":"Saw live"}${n&&!fresh?` <em>${n}</em>`:""}</button>`;
+  }
+  const hourOf=t=>{ const d=new Date(t); return d.getHours()+d.getMinutes()/60; };
+  const hourGap=(a,b)=>{ const d=Math.abs(a-b)%24; return Math.min(d,24-d); };
+  function likelyScore(h,now){
+    const nowH=hourOf(now), nowD=new Date(now).getDay();
+    return (logs[h]||[]).reduce((sum,t)=>{
+      const near=Math.max(0,1-hourGap(hourOf(t),nowH)/2.5);              // within ~2.5 hours of this time of day
+      const day=new Date(t).getDay()===nowD?1:0.45;                        // same weekday counts most
+      const age=Math.pow(.5,(now-t)/(45*864e5));                           // older lives fade (45-day half-life)
+      return sum+near*day*age;
+    },0);
+  }
+  const DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  function pattern(h){
+    const a=logs[h]||[]; if(!a.length) return "";
+    const byDay=[0,0,0,0,0,0,0]; a.forEach(t=>byDay[new Date(t).getDay()]++);
+    const mx=Math.max(...byDay), days=DAYS.filter((_,i)=>byDay[i]&&byDay[i]>=mx*.6).slice(0,3).join("/");
+    let sx=0,sy=0; a.forEach(t=>{ const r=hourOf(t)/24*2*Math.PI; sx+=Math.cos(r); sy+=Math.sin(r); });
+    let hr=Math.atan2(sy,sx)/(2*Math.PI)*24; if(hr<0) hr+=24;
+    const d=new Date(); d.setHours(Math.floor(hr),Math.round((hr%1)*4)*15,0,0);
+    return `${days} around ${d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}`;
+  }
+  function drawLikely(){
+    const el=document.getElementById("igLikely"), now=Date.now();
+    const total=Object.values(logs).reduce((n,a)=>n+a.length,0);
+    if(!total){
+      el.innerHTML=`<div class="iglk"><div class="iglkh">Most likely live now</div>
+        <p class="iglkp">When you get a live notification, tap <b>Saw live</b> next to that player. After a few, this ranks who usually goes live at this day and time.</p></div>`;
+      return;
+    }
+    const ranked=players.map(o=>({o,s:likelyScore(o.h,now)})).filter(x=>x.s>0.05).sort((a,b)=>b.s-a.s).slice(0,5);
+    const top=ranked.length?ranked[0].s:1;
+    const lvl=s=>s>=top*.75&&s>=.6?"High":s>=top*.4&&s>=.25?"Medium":"Low";
+    const when=new Date(now).toLocaleString([],{weekday:"long",hour:"numeric",minute:"2-digit"});
+    el.innerHTML=`<div class="iglk"><div class="iglkh">Most likely live now <span>${when}</span></div>
+      ${ranked.length? ranked.map(({o,s})=>`<div class="iglkr">
+          <div class="ign"><b>#${o.p[F.num]} ${o.p[F.name]}</b><span>Usually ${pattern(o.h)} · ${(logs[o.h]||[]).length} logged</span></div>
+          <span class="iglv ${lvl(s).toLowerCase()}">${lvl(s)}</span>
+          <a class="w" href="https://www.instagram.com/${o.h}/live/" target="_blank" rel="noopener">Watch</a>
+        </div>`).join("")
+        : `<p class="iglkp">Nobody you’ve logged usually goes live around this time. Check back later.</p>`}
+      <p class="iglkf">Based on ${total} live${total===1?"":"s"} you’ve logged on this device.</p></div>`;
+  }
   const handleOf=u=>(String(u||"").match(/instagram\.com\/([^/?#]+)/)||[])[1]||"";
   // depth order: starters first, then by the roster's existing order
   const players=R.map((p,i)=>({i,p,h:handleOf((SOCIAL[norm(p[F.name])]||{}).ig)})).filter(o=>o.h);
@@ -1337,7 +1405,7 @@ document.getElementById("board").addEventListener("click",e=>{
     document.getElementById("igFill").style.width=(players.length?n/players.length*100:0)+"%";
   }
   function draw(){
-    prog();
+    prog(); drawLikely();
     const nq=norm(q.trim());
     const rows=players.filter(o=>(filt==="all"||(filt==="done")===!!done[o.h]) &&
       (!nq || norm(o.p[F.name]).includes(nq) || o.h.toLowerCase().includes(q.trim().toLowerCase().replace(/^@/,"")) || String(o.p[F.num])===q.trim()));
@@ -1346,6 +1414,7 @@ document.getElementById("board").addEventListener("click",e=>{
         <div class="igact">
           <a href="https://www.instagram.com/${o.h}/" target="_blank" rel="noopener">Open</a>
           <a class="w" href="https://www.instagram.com/${o.h}/live/" target="_blank" rel="noopener" title="Opens his live stream if he's live right now">Watch</a>
+          ${sawBtn(o.h)}
         </div>
         <label class="igchk"><input type="checkbox" data-h="${o.h}" ${done[o.h]?"checked":""}> Alerts on</label>
       </div>`).join("")
@@ -1361,6 +1430,13 @@ document.getElementById("board").addEventListener("click",e=>{
   ov.querySelector(".igfilt").addEventListener("click",e=>{
     const b=e.target.closest("[data-f]"); if(!b) return; filt=b.dataset.f;
     ov.querySelectorAll(".igfilt [data-f]").forEach(x=>x.setAttribute("aria-pressed",x===b)); draw();
+  });
+  list.addEventListener("click",e=>{
+    const b=e.target.closest("[data-saw]"); if(!b) return;
+    const h=b.dataset.saw, a=logs[h]||(logs[h]=[]);
+    if(Date.now()-lastLog(h)<RECENT) a.pop(); else a.push(Date.now());
+    if(!a.length) delete logs[h];
+    saveLogs(); b.outerHTML=sawBtn(h); drawLikely();
   });
   list.addEventListener("change",e=>{
     const c=e.target.closest("input[data-h]"); if(!c) return;
