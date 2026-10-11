@@ -251,6 +251,36 @@
   .bxscroll tr.tot td:first-child{background:#f8fafc}
   @media (min-width:900px){ .bxcat.two .bxpair{grid-template-columns:1fr 1fr} }
   @media (max-width:520px){ .bxscroll th:first-child,.bxscroll td:first-child{min-width:128px} #fbxBody{padding:0 12px 14px} }
+  /* ---------- Instagram Live alerts ---------- */
+  .iglbtn{display:inline-flex;align-items:center;gap:6px;font-weight:700;white-space:nowrap}
+  .igdot{width:9px;height:9px;border-radius:50%;background:linear-gradient(45deg,#f9a03f,#e1306c 55%,#833ab4)}
+  .igh{background:linear-gradient(110deg,#833ab4,#e1306c 55%,#f77737)}
+  .igbadge{width:46px;height:46px;border-radius:14px;flex:0 0 auto;background:rgba(255,255,255,.2) center/26px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Crect x='3' y='3' width='18' height='18' rx='5'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Ccircle cx='17.5' cy='6.5' r='1' fill='white'/%3E%3C/svg%3E")}
+  .igbar{height:6px;border-radius:3px;background:#eef1f5;overflow:hidden;margin-bottom:12px}
+  .igbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#833ab4,#e1306c,#f77737);transition:width .25s}
+  .ighow{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13.5px;line-height:1.5;color:var(--ink)}
+  .ighow summary{font-weight:700;cursor:pointer}
+  .ighow ol{margin:8px 0;padding-left:20px}
+  .ighow p{margin:8px 0 0;color:var(--muted)}
+  .igq{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:15px var(--sans);margin-bottom:8px}
+  .igq:focus{outline:2px solid #e1306c;border-color:#e1306c}
+  .igfilt{display:flex;gap:6px;margin-bottom:6px}
+  .igfilt button{border:1.5px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:5px 12px;font:600 12.5px var(--sans);cursor:pointer}
+  .igfilt button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+  .igrow{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+  .igrow:last-child{border-bottom:0}
+  .ign{min-width:0}
+  .ign b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ign span{font-size:12px;color:var(--muted)}
+  .igact{display:flex;gap:6px;align-items:center}
+  .igact a{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:600 12.5px var(--sans);color:var(--ink);text-decoration:none;background:#fff}
+  .igact a.w{border-color:#e1306c;color:#c21d58}
+  .igchk{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;width:max-content}
+  .igchk input{width:18px;height:18px;accent-color:#e1306c;cursor:pointer}
+  .igrow.on .igchk{color:#1b7a43}
+  .igempty{color:var(--muted);font-size:14px;text-align:center;padding:24px 8px}
+  .igact a:focus-visible,.igfilt button:focus-visible,.iglbtn:focus-visible{outline:2px solid #e1306c;outline-offset:2px}
+  @media (min-width:520px){ .igrow{grid-template-columns:1fr auto auto} .igchk{grid-column:auto} }
 </style>
 </head>
 <body>
@@ -318,6 +348,7 @@
         <option value="F">&nbsp;&nbsp;— Freshmen</option>
       </select>
       <button id="refreshBtn" class="toggle" type="button" title="Reload live stats" aria-label="Refresh live stats">↻</button>
+      <button id="igLiveBtn" class="toggle iglbtn" type="button" title="Instagram Live alerts" aria-haspopup="dialog"><span class="igdot" aria-hidden="true"></span>IG Live</button>
       <span class="count" id="count"></span>
     </div>
     <div class="chips" id="chips"></div>
@@ -337,6 +368,34 @@
 <div class="empty" id="empty">No players match that filter.</div>
 
 <div class="overlay" id="overlay"><div class="modal" role="dialog" aria-modal="true" aria-label="Player details"></div></div>
+<div class="overlay" id="igOverlay"><div class="modal igm" role="dialog" aria-modal="true" aria-labelledby="igTitle">
+  <div class="mhead igh">
+    <div class="igbadge" aria-hidden="true"></div>
+    <div><div class="mn" id="igTitle">Instagram Live</div><div class="mp" id="igProg"></div></div>
+    <button class="mclose" id="igClose" type="button" aria-label="Close">×</button>
+  </div>
+  <div class="mbody">
+    <div class="igbar" aria-hidden="true"><i id="igFill"></i></div>
+    <details class="ighow" id="igHow">
+      <summary>How live alerts work</summary>
+      <p>Instagram doesn’t let other websites see who’s live, so the alert comes from Instagram itself. Turn it on once per player and your phone gets a push notification every time he goes live:</p>
+      <ol>
+        <li>Tap <b>Open</b> next to a player (it opens the Instagram app).</li>
+        <li>Follow him, then tap the <b>bell</b> at the top right of his profile.</li>
+        <li>Tap <b>Live videos</b> and choose <b>All notifications</b>.</li>
+        <li>Come back here and check <b>Alerts on</b> to track who’s done.</li>
+      </ol>
+      <p>Anyone you follow who’s live also shows first in your Stories row with a red <b>LIVE</b> label. Tap <b>Watch</b> here to jump straight to a player’s stream.</p>
+    </details>
+    <input id="igQ" class="igq" type="search" placeholder="Search players" autocomplete="off" aria-label="Search players">
+    <div class="igfilt" role="group" aria-label="Filter">
+      <button type="button" data-f="todo" aria-pressed="true">Not set up</button>
+      <button type="button" data-f="done" aria-pressed="false">Alerts on</button>
+      <button type="button" data-f="all" aria-pressed="false">All</button>
+    </div>
+    <div id="igList"></div>
+  </div>
+</div></div>
 
 <footer>
   The 2026 record, live score, and a full game-by-game log for every player load live from ESPN’s public data when the page opens (no key or setup) — with a separate live entry while a game is in progress; previous seasons are stored in the file. If ESPN can’t be reached, it falls back to the stored numbers.
@@ -1257,6 +1316,59 @@ document.getElementById("board").addEventListener("click",e=>{
   let open=true; try{ open=localStorage.getItem("ukdc-gc-open")!=="0"; }catch(e){}
   set(open);
   t.addEventListener("click",()=>{ const o=gc.classList.contains("closed"); set(o); try{ localStorage.setItem("ukdc-gc-open",o?"1":"0"); }catch(e){} });
+})();
+
+/* ---------- Instagram Live alerts: Instagram has no public "who's live" feed, so this sets up
+   Instagram's own live notifications per player and tracks which ones are done. ---------- */
+(function(){
+  const KEY="ukdc-iglive";
+  let done={}; try{ done=JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){}
+  const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(done)); }catch(e){} };
+  const handleOf=u=>(String(u||"").match(/instagram\.com\/([^/?#]+)/)||[])[1]||"";
+  // depth order: starters first, then by the roster's existing order
+  const players=R.map((p,i)=>({i,p,h:handleOf((SOCIAL[norm(p[F.name])]||{}).ig)})).filter(o=>o.h);
+  const rank=o=>{ const d=String(o.p[F.dr]||""); return d==="1"||/^s/i.test(d)?0:d==="2"?1:d==="3"?2:3; };
+  players.sort((a,b)=>rank(a)-rank(b)||a.i-b.i);
+  let filt="todo", q="";
+  const ov=document.getElementById("igOverlay"), list=document.getElementById("igList");
+  function prog(){
+    const n=players.filter(o=>done[o.h]).length;
+    document.getElementById("igProg").textContent=`Live alerts on for ${n} of ${players.length} players`;
+    document.getElementById("igFill").style.width=(players.length?n/players.length*100:0)+"%";
+  }
+  function draw(){
+    prog();
+    const nq=norm(q.trim());
+    const rows=players.filter(o=>(filt==="all"||(filt==="done")===!!done[o.h]) &&
+      (!nq || norm(o.p[F.name]).includes(nq) || o.h.toLowerCase().includes(q.trim().toLowerCase().replace(/^@/,"")) || String(o.p[F.num])===q.trim()));
+    list.innerHTML=rows.length? rows.map(o=>`<div class="igrow ${done[o.h]?"on":""}">
+        <div class="ign"><b>#${o.p[F.num]} ${o.p[F.name]}</b><span>${o.p[F.pos]} · @${o.h}</span></div>
+        <div class="igact">
+          <a href="https://www.instagram.com/${o.h}/" target="_blank" rel="noopener">Open</a>
+          <a class="w" href="https://www.instagram.com/${o.h}/live/" target="_blank" rel="noopener" title="Opens his live stream if he's live right now">Watch</a>
+        </div>
+        <label class="igchk"><input type="checkbox" data-h="${o.h}" ${done[o.h]?"checked":""}> Alerts on</label>
+      </div>`).join("")
+      : `<div class="igempty">${filt==="todo"&&!q?"Live alerts are on for every player. Nice.":filt==="done"&&!q?"No players checked yet. Turn on alerts for a player in Instagram, then check Alerts on.":"No players match."}</div>`;
+  }
+  function open(){ draw(); ov.classList.add("on"); document.body.style.overflow="hidden"; setTimeout(()=>document.getElementById("igQ").focus({preventScroll:true}),50); }
+  function close(){ ov.classList.remove("on"); document.body.style.overflow=""; document.getElementById("igLiveBtn").focus(); }
+  document.getElementById("igLiveBtn").addEventListener("click",open);
+  document.getElementById("igClose").addEventListener("click",close);
+  ov.addEventListener("click",e=>{ if(e.target===ov) close(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&ov.classList.contains("on")) close(); });
+  document.getElementById("igQ").addEventListener("input",e=>{ q=e.target.value; draw(); });
+  ov.querySelector(".igfilt").addEventListener("click",e=>{
+    const b=e.target.closest("[data-f]"); if(!b) return; filt=b.dataset.f;
+    ov.querySelectorAll(".igfilt [data-f]").forEach(x=>x.setAttribute("aria-pressed",x===b)); draw();
+  });
+  list.addEventListener("change",e=>{
+    const c=e.target.closest("input[data-h]"); if(!c) return;
+    if(c.checked) done[c.dataset.h]=Date.now(); else delete done[c.dataset.h];
+    save(); c.closest(".igrow").classList.toggle("on",c.checked); prog();
+  });
+  // first visit: show the how-to expanded until at least one player is checked
+  if(!Object.keys(done).length) document.getElementById("igHow").open=true;
 })();
 
 render();
