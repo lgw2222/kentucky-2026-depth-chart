@@ -1,0 +1,27 @@
+name: Update draft rankings
+
+on:
+  schedule:
+    - cron: "17 11 * * *"   # every day, about 6–7 AM Kentucky time
+  workflow_dispatch:          # adds a "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read the big board and write draft.json
+        run: python scripts/update_draft.py
+      - name: Save draft.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add draft.json
+          git commit -m "Update draft rankings" || echo "Nothing to commit"
+          git push

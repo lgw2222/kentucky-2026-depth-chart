@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kentucky Wildcats 2026 Depth Chart</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0033A0">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="UK Football">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -296,12 +304,71 @@
   .iglv.high{background:#e1306c;color:#fff} .iglv.medium{background:#fde7f0;color:#c21d58} .iglv.low{background:#eef1f5;color:var(--muted)}
   .iglkf{font-size:11.5px;color:var(--muted);margin:6px 0 0}
   @media (max-width:420px){ .igrow{grid-template-columns:1fr} .igact{flex-wrap:wrap} }
+  /* ---------- Rankings ---------- */
+  #overlay{z-index:60}
+  .rkbtn{font-weight:700;white-space:nowrap}
+  .rkm{max-width:860px}
+  .rkh{background:linear-gradient(110deg,var(--uk),#0b4fd6)}
+  .rktabs{margin:0 0 10px}
+  .rkq{margin-top:2px}
+  .rkpos{flex-wrap:wrap;margin-bottom:4px}
+  .rkpos[hidden]{display:none}
+  .rkstatus{font-size:12.5px;color:var(--muted);margin:6px 0 2px}
+  .linkbtn{background:none;border:0;padding:0;color:var(--uk);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline}
+  .rksec h3{font-family:var(--num);text-transform:uppercase;letter-spacing:1px;font-size:14px;font-weight:600;margin:16px 0 4px;padding-bottom:5px;border-bottom:2px solid var(--uk);color:var(--ink)}
+  .rksec h3 span{font-family:var(--sans);text-transform:none;letter-spacing:0;font-size:12px;color:var(--muted);margin-left:6px}
+  .rkhead,.rksec .rkrow{display:grid;grid-template-columns:minmax(0,1fr) 62px 44px 58px 70px;gap:6px;align-items:center}
+  .rkhead{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:4px 0}
+  .rkhead span:not(:first-child),.rkv{text-align:right}
+  .rkrow{width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 0;text-align:left;font-family:var(--sans);color:var(--ink);cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+  .rkrow:hover{background:#f6f8fb}
+  .rkrow:focus-visible,.rktabs button:focus-visible{outline:2px solid var(--uk);outline-offset:1px}
+  .rkn{min-width:0}
+  .rkn b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rkn span{font-size:12px;color:var(--muted)}
+  .rkv{font-family:var(--num);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .rkdr{text-align:right}
+  .rkdr b{display:block;font-family:var(--num);font-size:20px;color:var(--uk);line-height:1.1}
+  .rkdr span{font-size:12px;color:var(--muted)}
+  .rkp-draft{display:flex;gap:12px;align-items:center;background:#f4f7fd;border:1px solid #d8e2f5;border-radius:12px;padding:10px 12px;margin:4px 0 8px}
+  .rkbig{font-family:var(--num);font-weight:700;font-size:26px;color:var(--uk);min-width:58px;text-align:center}
+  .rkbig.sm{font-size:19px}
+  .rkp-draft b{display:block;font-size:14px}
+  .rkp-draft span{display:block;font-size:12.5px;color:var(--muted);line-height:1.4}
+  .rkp-row{display:grid;grid-template-columns:minmax(0,1.3fr) 1fr 1fr 1fr;gap:8px;align-items:end;padding:8px 0;border-bottom:1px solid var(--line)}
+  .rkp-l b{display:block;font-size:13px} .rkp-l span{font-family:var(--num);font-size:17px;font-weight:600}
+  .rkp-c{font-family:var(--num);font-size:17px;font-weight:600;text-align:right;color:var(--uk)}
+  .rkp-k{display:block;font-family:var(--sans);font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .rkp-note{font-size:12px;color:var(--muted);margin:8px 0 4px;line-height:1.45}
+  @media (max-width:520px){
+    .rkhead,.rksec .rkrow{grid-template-columns:minmax(0,1fr) 48px 32px 46px 58px;gap:4px}
+    .rkv{font-size:14px}
+    .rkp-row{grid-template-columns:minmax(0,1fr) 44px 64px 64px}
+    .rkp-c{font-size:15px}
+  }
+  .rkbtn{position:relative}
+  .rkbtn.stale::after{content:"";position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#e8590c;box-shadow:0 0 0 2px #fff}
+  .rkwarn{background:#fff4e6;border:1px solid #ffc078;color:#7a3e00;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45;margin:4px 0 10px}
+  .rkp-note a{color:var(--uk);font-weight:600}
+  /* ---------- App (PWA) ---------- */
+  .mbrand{display:flex;align-items:center;gap:14px}
+  .mlogo{width:clamp(48px,10vw,68px);height:auto;border-radius:22%;flex:0 0 auto;box-shadow:0 2px 10px rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.35)}
+  .installbar{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:45;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 10px 10px 12px;box-shadow:0 8px 28px rgba(8,14,28,.28)}
+  .installbar[hidden]{display:none}
+  .installbar img{border-radius:9px;flex:0 0 auto}
+  .ibtxt{flex:1;min-width:0}
+  .ibtxt b{display:block;font-size:14px}
+  .ibtxt span{display:block;font-size:12px;color:var(--muted);line-height:1.35}
+  #ibInstall{background:var(--uk);color:#fff;border:0;border-radius:9px;padding:9px 14px;font:700 13.5px var(--sans);cursor:pointer;white-space:nowrap}
+  #ibClose{background:none;border:0;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:4px 6px}
+  #ibInstall:focus-visible,#ibClose:focus-visible{outline:2px solid var(--uk);outline-offset:2px}
+  @media (display-mode: standalone){ .installbar{display:none!important} }
 </style>
 </head>
 <body>
 <header class="mast">
   <div class="mast-inner">
-    <h1>Kentucky Wildcats<span>2026 Depth Chart</span></h1>
+    <div class="mbrand"><svg class="mlogo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">  <defs>    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">      <stop offset="0" stop-color="#0a3fbf"/><stop offset=".55" stop-color="#0033A0"/><stop offset="1" stop-color="#001b57"/>    </linearGradient>  </defs>  <rect width="512" height="512" fill="url(#bg)"/>  <g transform="translate(256 262) scale(.92) translate(-256 -262)">    <!-- head -->    <path fill="#fff" d="M256 408 L322 372 L366 318 L384 248 L376 178 L362 104 L304 150 L256 142 L208 150 L150 104 L136 178 L128 248 L146 318 L190 372 Z"/>    <!-- inner ears -->    <path fill="#0033A0" d="M160 136 L196 162 L170 196 Z M352 136 L316 162 L342 196 Z"/>    <!-- brow stripes -->    <path fill="#0033A0" d="M256 160 L270 176 L256 214 L242 176 Z M222 166 L234 172 L226 200 L214 182 Z M290 166 L278 172 L286 200 L298 182 Z"/>    <!-- eyes -->    <path fill="#0033A0" d="M170 236 L238 256 L230 282 L192 276 Z M342 236 L274 256 L282 282 L320 276 Z"/>    <path fill="#fff" d="M214 254 L222 256 L218 276 L212 275 Z M298 254 L290 256 L294 276 L300 275 Z"/>    <!-- muzzle -->    <path fill="#0033A0" d="M234 304 L278 304 L256 330 Z"/>    <path fill="none" stroke="#0033A0" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" d="M256 330 L256 346 M256 346 Q240 362 220 352 M256 346 Q272 362 292 352"/>    <!-- cheek stripes -->    <path fill="none" stroke="#0033A0" stroke-width="9" stroke-linecap="round" d="M150 300 L196 312 M156 330 L198 330 M362 300 L316 312 M356 330 L314 330"/>  </g></svg><h1>Kentucky Wildcats<span>2026 Depth Chart</span></h1></div>
     <div class="facts">
       <div>HC <b>Will Stein</b> (Yr 1)</div>
       <div>OC <b>Joe Sloan</b></div>
@@ -363,6 +430,7 @@
         <option value="F">&nbsp;&nbsp;— Freshmen</option>
       </select>
       <button id="refreshBtn" class="toggle" type="button" title="Reload live stats" aria-label="Refresh live stats">↻</button>
+      <button id="rkBtn" class="toggle rkbtn" type="button" title="Draft board and position rankings" aria-haspopup="dialog">Rankings</button>
       <button id="igLiveBtn" class="toggle iglbtn" type="button" title="Instagram Live alerts" aria-haspopup="dialog"><span class="igdot" aria-hidden="true"></span>IG Live</button>
       <span class="count" id="count"></span>
     </div>
@@ -383,6 +451,37 @@
 <div class="empty" id="empty">No players match that filter.</div>
 
 <div class="overlay" id="overlay"><div class="modal" role="dialog" aria-modal="true" aria-label="Player details"></div></div>
+<div class="installbar" id="installBar" hidden>
+  <img src="icons/icon-192.png" alt="" width="36" height="36">
+  <div class="ibtxt"><b>Get the UK Football app</b><span id="ibSub">Opens full screen from your home screen.</span></div>
+  <button type="button" id="ibInstall">Install</button>
+  <button type="button" id="ibClose" aria-label="Not now">×</button>
+</div>
+<div class="overlay" id="rkOverlay"><div class="modal rkm" role="dialog" aria-modal="true" aria-labelledby="rkTitle">
+  <div class="mhead rkh">
+    <div><div class="mn" id="rkTitle">Rankings</div><div class="mp">2027 NFL draft board and where every Wildcat ranks at his position</div></div>
+    <button class="mclose" id="rkClose" type="button" aria-label="Close">×</button>
+  </div>
+  <div class="mbody">
+    <div class="gtabs rktabs" role="tablist" aria-label="Rankings view">
+      <button type="button" role="tab" data-rktab="draft" aria-selected="true">NFL Draft board</button>
+      <button type="button" role="tab" data-rktab="pos" aria-selected="false">Position ranks</button>
+    </div>
+    <input id="rkQ" class="igq rkq" type="search" placeholder="Search players by name or #" autocomplete="off" aria-label="Search rankings">
+    <div class="igfilt rkpos" id="rkPosRow" role="group" aria-label="Position" hidden>
+      <button type="button" data-rkpos="ALL" aria-pressed="true">All</button>
+      <button type="button" data-rkpos="QB" aria-pressed="false">QB</button>
+      <button type="button" data-rkpos="RB" aria-pressed="false">RB</button>
+      <button type="button" data-rkpos="WR" aria-pressed="false">WR</button>
+      <button type="button" data-rkpos="TE" aria-pressed="false">TE</button>
+      <button type="button" data-rkpos="DL" aria-pressed="false">DL/Edge</button>
+      <button type="button" data-rkpos="LB" aria-pressed="false">LB</button>
+      <button type="button" data-rkpos="DB" aria-pressed="false">DB</button>
+      <button type="button" data-rkpos="K" aria-pressed="false">K</button>
+    </div>
+    <div id="rkBody"></div>
+  </div>
+</div></div>
 <div class="overlay" id="igOverlay"><div class="modal igm" role="dialog" aria-modal="true" aria-labelledby="igTitle">
   <div class="mhead igh">
     <div class="igbadge" aria-hidden="true"></div>
@@ -742,6 +841,7 @@ function openModal(i){
       <div class="mbadges">${badges.join("")}</div>
       ${socialHtml(p)}
       ${playerHlHtml(p)}
+      ${rankingsProfileHtml(p)}
       <div class="stitle">2026 game log</div>
       ${logHtml}
       ${prevRows?`<div class="stitle">Previous seasons</div>${prevRows}`:""}
@@ -992,6 +1092,7 @@ async function loadSeason(fullBox){
   computeTotals();
   render();                                                                  // repaint grid so stat sorts/badges use fresh totals
   seasonLoaded=true; renderGameCenter();                                     // team-vs-team dashboard + game picker
+  if(fullBox) setTimeout(()=>loadRanks(),1500);                             // SEC/FBS position ranks (cached 6h)
   if(overlay.classList.contains("on") && curIdx!=null) openModal(curIdx);   // repaint open card
   if(liveG){ clearTimeout(liveTimer); liveTimer=setTimeout(()=>refresh(),60000); }
 }
@@ -1445,6 +1546,289 @@ document.getElementById("board").addEventListener("click",e=>{
   });
   // first visit: show the how-to expanded until at least one player is checked
   if(!Object.keys(done).length) document.getElementById("igHow").open=true;
+})();
+
+/* ---------- Rankings: 2027 NFL draft board + position ranks (UK team, SEC, all FBS) ---------- */
+// Draft data: consensus big board ranks, mid-October 2026. Update these by hand as boards move.
+const DRAFT_ASOF="Oct 17, 2026", DRAFT_SRC="NFL Mock Draft Database consensus big board";
+const DRAFT27={
+  "Lance Heard":{r:53,note:"Recent coverage has him in a 1st–2nd round range."},
+  "Tavion Gadson":{r:58},
+  "Nic Anderson":{r:217},
+  "CJ Baxter":{r:218},
+  "Jordan Castell":{r:320},
+  "Coleton Price":{r:332,note:"ESPN’s Jordan Reid says his stock has steadily improved this season."},
+  "Jaden Smith":{r:681},
+  "Olaus Alinen":{r:785},
+  "Tegra Tshabola":{r:913},
+  "Mi'Quise Humphrey-Grace":{r:1012},
+  "Ty Bryant":{r:null,note:"No. 236 on ScoutingGrade’s big board."},
+};
+// Daily auto-update: a GitHub Action writes draft.json (Tankathon big board) next to this page.
+let DRAFT_AUTO=null, draftAutoState="loading";
+const DRAFT_STALE_DAYS=3;
+async function loadDraftAuto(){
+  try{
+    const r=await fetch(`draft.json?t=${Date.now()}`,{cache:"no-store"});
+    if(!r.ok) throw 0;
+    const d=await r.json(); if(!d||!d.players) throw 0;
+    DRAFT_AUTO=d; draftAutoState="ok";
+  }catch(e){ draftAutoState="missing"; }
+  drawRankings(); updateRkDot();
+  if(curIdx!=null&&document.getElementById("overlay").classList.contains("on")) openModal(curIdx);
+}
+const _autoFor=p=>{ if(!DRAFT_AUTO) return null; const k=norm(p[F.name]); for(const n in DRAFT_AUTO.players){ if(norm(n)===k) return DRAFT_AUTO.players[n]; } return null; };
+function draftAgeDays(){ if(!DRAFT_AUTO||!DRAFT_AUTO.checked) return null; return (Date.now()-new Date(DRAFT_AUTO.checked).getTime())/864e5; }
+const draftStale=()=>draftAutoState==="missing"||(draftAgeDays()!=null&&draftAgeDays()>DRAFT_STALE_DAYS);
+function draftOf(p){
+  const a=_autoFor(p), c=DRAFT27[p[F.name]]||null;
+  if(!a&&!c) return null;
+  return {r:a?a.rank:null, auto:!!a, onBoard:!!a, cons:c&&c.r, note:c&&c.note, url:a&&a.url};
+}
+const draftSortKey=d=>d.r||((d.cons||5000)+1000);   // board rank first, then stored consensus
+function updateRkDot(){ const b=document.getElementById("rkBtn"); if(b) b.classList.toggle("stale",draftStale()); }
+function draftReminderHtml(){
+  if(draftAutoState==="loading") return "";
+  if(draftAutoState==="missing") return `<div class="rkwarn"><b>Automatic draft updates aren’t running yet.</b> The draft ranks below are from ${DRAFT_ASOF}. Add the update files to the GitHub repo (or ask Claude to refresh the board).</div>`;
+  const days=draftAgeDays();
+  if(days>DRAFT_STALE_DAYS){
+    const when=new Date(DRAFT_AUTO.checked).toLocaleDateString([],{month:"short",day:"numeric"});
+    return `<div class="rkwarn"><b>Reminder: the draft board hasn’t updated since ${when}.</b> The daily update may have stopped. In the GitHub repo, open <b>Actions</b> → <b>Update draft rankings</b> → <b>Run workflow</b>, or ask Claude to fix it.</div>`;
+  }
+  return "";
+}
+function draftSourceLine(){
+  if(DRAFT_AUTO){ const t=new Date(DRAFT_AUTO.checked);
+    return `Board ranks from the <a href="${DRAFT_AUTO.sourceUrl}" target="_blank" rel="noopener">${DRAFT_AUTO.source}</a>, updated automatically every morning (last checked ${t.toLocaleDateString([],{weekday:"short",month:"short",day:"numeric"})}). It ranks the top ${DRAFT_AUTO.boardSize} prospects; players outside it show their consensus rank from ${DRAFT_ASOF}.`; }
+  return `Ranks are the ${DRAFT_SRC} as of ${DRAFT_ASOF}.`;
+}
+function draftRound(r){ if(!r) return ""; return r<=32?"1st round":r<=64?"2nd round":r<=100?"3rd round":r<=140?"4th round":r<=180?"5th round":r<=220?"6th round":r<=257?"7th round":"Undrafted range"; }
+function eligYear(p){
+  if(draftOf(p)) return 2027;
+  const c=p[F.cls]; if(c==="JR"||c==="SR"||c==="5Y") return 2027;
+  if(c==="SO") return 2028;
+  return (typeof RS_FR_RETURNERS!=="undefined"&&RS_FR_RETURNERS.has(p[F.name]))?2028:2029;
+}
+
+// Stat ranks: each UK position group is ranked against the same position family on ESPN.
+const RK_FAM={QB:["QB"],RB:["RB","FB","HB"],WR:["WR"],TE:["TE"],DL:["DL","DE","DT","NT"],EDGE:["DE","DL","LB","OLB","EDGE"],
+  LB:["LB","OLB","ILB","MLB"],DB:["DB","CB","S","SAF","FS","SS","NB"],K:["K","PK"],P:["P"]};
+const RK_FAM_NAME={QB:"QBs",RB:"RBs",WR:"WRs",TE:"TEs",DL:"DL",EDGE:"edge rushers",LB:"LBs",DB:"DBs",K:"kickers",P:"punters",ALL:"players"};
+const RK_METRICS={
+  passYds:{label:"Passing yards",short:"Pass yds",cats:["offense:passing","passing"],sort:"passing.passingYards"},
+  passTD: {label:"Passing TD",short:"Pass TD",cats:["offense:passing","passing"],sort:"passing.passingTouchdowns"},
+  rushYds:{label:"Rushing yards",short:"Rush yds",cats:["offense:rushing","rushing"],sort:"rushing.rushingYards"},
+  rushTD: {label:"Rushing TD",short:"Rush TD",cats:["offense:rushing","rushing"],sort:"rushing.rushingTouchdowns"},
+  recYds: {label:"Receiving yards",short:"Rec yds",cats:["offense:receiving","receiving"],sort:"receiving.receivingYards"},
+  rec:    {label:"Receptions",short:"Rec",cats:["offense:receiving","receiving"],sort:"receiving.receptions"},
+  tkl:    {label:"Tackles",short:"Tkl",cats:["defense","defense:defensive","defensive"],sort:"defensive.totalTackles"},
+  sacks:  {label:"Sacks",short:"Sacks",cats:["defense","defense:defensive","defensive"],sort:"defensive.sacks"},
+  dint:   {label:"Interceptions",short:"INT",cats:["defense","defense:defensiveInterceptions","defensiveInterceptions"],sort:"defensiveInterceptions.interceptions"},
+  fgm:    {label:"Field goals made",short:"FG",cats:["specialTeams:kicking","special:kicking","kicking"],sort:"kicking.fieldGoalsMade"},
+};
+// which metrics each UK player is ranked in, and against which family ("ALL" = every position)
+function rkFamily(p){ const g=p[F.group]; if(g!=="ST") return g; return /^(K|PK)$/.test(p[F.pos])?"K":/^P$/.test(p[F.pos])?"P":null; }
+function rkPlan(p){
+  const f=rkFamily(p);
+  return ({QB:[["passYds","QB"],["passTD","QB"],["rushYds","QB"]],
+    RB:[["rushYds","RB"],["rushTD","RB"],["recYds","RB"]],
+    WR:[["recYds","WR"],["rec","WR"]], TE:[["recYds","TE"],["rec","TE"]],
+    DL:[["sacks","ALL"],["tkl","DL"]], EDGE:[["sacks","ALL"],["tkl","EDGE"]],
+    LB:[["tkl","LB"],["sacks","ALL"]], DB:[["tkl","DB"],["dint","ALL"]],
+    K:[["fgm","K"]]}[f])||[];
+}
+const RK_GROUPS={sec:{id:8,label:"SEC",pages:3},fbs:{id:80,label:"FBS",pages:6}};
+let RANKS={}, rkState="idle", rkAt=0;   // RANKS[normName][metric] = {sec:{r}|{over:n}, fbs:...}
+const RK_KEY="ukdc-ranks-v1", RK_TTL=6*3600e3;
+try{ const c=JSON.parse(localStorage.getItem(RK_KEY)||"null"); if(c&&c.t&&Date.now()-c.t<RK_TTL){ RANKS=c.data||{}; rkAt=c.t; rkState="ready"; } }catch(e){}
+
+const _ukAth=a=>String(a.teamId)===String(ESPN_TEAM) || a.team==="UK" || a.teamName==="Kentucky" || a.teamName==="Kentucky Wildcats";
+function _athRow(x){
+  const a=x.athlete||x||{}, t=a.team||{};
+  return {name:a.displayName||a.fullName||"", teamId:a.teamId||t.id||"", team:a.teamShortName||a.teamAbbreviation||t.abbreviation||"",
+    teamName:a.teamName||t.location||t.displayName||"", pos:String((a.position&&(a.position.abbreviation||a.position.name))||a.positionAbbreviation||"").toUpperCase(), raw:x};
+}
+function _sortVal(d,x,sort){
+  const [cn,sn]=sort.split("."); const rc=(d.categories||[]).find(c=>c.name===cn); if(!rc) return null;
+  const i=(rc.names||[]).indexOf(sn); if(i<0) return null;
+  const ac=(x.categories||[]).find(c=>c.name===cn); if(!ac) return null;
+  const v=parseFloat(String(((ac.totals||ac.values||[])[i])??"").replace(/,/g,"")); return isNaN(v)?null:v;
+}
+const _rkUrl=(cat,sort,grp,page)=>`https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/statistics/byathlete?region=us&lang=en&contentorigin=espn&isqualified=false&page=${page}&limit=100&category=${encodeURIComponent(cat)}&sort=${encodeURIComponent(sort+":desc")}&season=2026&seasontype=2&group=${grp}`;
+const _rkCatOK={};
+async function _rkPage(metric,grp,page){
+  const m=RK_METRICS[metric], tries=_rkCatOK[metric]?[_rkCatOK[metric]]:m.cats;
+  for(const cat of tries){
+    const d=await j(_rkUrl(cat,m.sort,grp,page));
+    if(d&&Array.isArray(d.athletes)&&(d.athletes.length||_rkCatOK[metric])){ _rkCatOK[metric]=cat; return d; }
+  }
+  return null;
+}
+// rank every UK target for one metric within one group (SEC or FBS)
+async function _rkRun(metric,gk,targets){
+  const G=RK_GROUPS[gk], famCount={}, famPrev={}, left=new Set(targets.map(t=>t.key)), out={};
+  let seen=0, ok=false;
+  for(let page=1; page<=G.pages && left.size; page++){
+    const d=await _rkPage(metric,G.id,page); if(!d) break; ok=true;
+    const list=d.athletes||[]; if(!list.length) break;
+    for(const x of list){
+      const a=_athRow(x); seen++;
+      const v=_sortVal(d,x,RK_METRICS[metric].sort);
+      for(const fam of new Set(targets.map(t=>t.fam))){
+        const inFam = fam==="ALL" || (RK_FAM[fam]||[]).includes(a.pos);
+        if(!inFam) continue;
+        famCount[fam]=(famCount[fam]||0)+1;
+        const prev=famPrev[fam]; const rank=(prev&&v!=null&&prev.v===v)?prev.r:famCount[fam];
+        famPrev[fam]={v,r:rank};
+        if(_ukAth(a)){
+          const t=targets.find(t=>t.fam===fam && t.key===norm(a.name));
+          if(t&&left.has(t.key)){ out[t.key]={r:rank}; left.delete(t.key); }
+        }
+      }
+    }
+    const pg=d.pagination||{}; if(pg.pages&&page>=pg.pages) break;
+  }
+  if(!ok) return null;
+  targets.forEach(t=>{ if(!out[t.key]) out[t.key]={over:famCount[t.fam]||seen}; });  // not in the pages fetched → ranked below everyone seen
+  return out;
+}
+async function loadRanks(force){
+  if(rkState==="loading") return;
+  if(!force && rkState==="ready" && Date.now()-rkAt<RK_TTL) return;
+  rkState="loading"; drawRankings();
+  const byMetric={};
+  R.forEach(p=>{ rkPlan(p).forEach(([m,fam])=>{ if(totVal(p,m)>0) (byMetric[m]=byMetric[m]||[]).push({key:norm(p[F.name]),fam}); }); });
+  const next={}; let any=false;
+  const jobs=[]; for(const m in byMetric) for(const gk in RK_GROUPS) jobs.push([m,gk]);
+  for(let i=0;i<jobs.length;i+=3){
+    await Promise.all(jobs.slice(i,i+3).map(async([m,gk])=>{
+      const res=await _rkRun(m,gk,byMetric[m]); if(!res) return; any=true;
+      for(const k in res){ (next[k]=next[k]||{}); (next[k][m]=next[k][m]||{})[gk]=res[k]; }
+    }));
+  }
+  if(any){ RANKS=next; rkAt=Date.now(); rkState="ready"; try{ localStorage.setItem(RK_KEY,JSON.stringify({t:rkAt,data:RANKS})); }catch(e){} }
+  else rkState=Object.keys(RANKS).length?"ready":"failed";
+  drawRankings();
+}
+// UK team rank within the same family (computed from the season totals already on the page)
+function teamRank(p,m){
+  const f=rkFamily(p), v=totVal(p,m); if(!v) return null;
+  const peers=R.filter(q=>rkFamily(q)===f && totVal(q,m)>0).map(q=>totVal(q,m)).sort((a,b)=>b-a);
+  return peers.indexOf(v)+1;
+}
+const _ord=n=>`#${n}`;
+function rankText(x){ if(!x) return "—"; return x.r?_ord(x.r):x.over?`${_ord(x.over)}+`:"—"; }
+function fmtNum(v){ return Number.isInteger(v)?v.toLocaleString():String(Math.round(v*10)/10); }
+
+/* profile section */
+function rankingsProfileHtml(p){
+  const d=draftOf(p), ey=eligYear(p), key=norm(p[F.name]);
+  const src=DRAFT_AUTO?DRAFT_AUTO.source:DRAFT_SRC;
+  const draft = d&&d.r ? `<div class="rkp-draft"><span class="rkbig">#${d.r}</span><div><b>2027 NFL Draft · ${draftRound(d.r)}</b><span>#${d.r} on the ${src}${DRAFT_AUTO?" (updates daily)":` (as of ${DRAFT_ASOF})`}${d.cons&&DRAFT_AUTO?`. Consensus #${d.cons} as of ${DRAFT_ASOF}`:""}${d.note?`. ${d.note}`:""}</span></div></div>`
+    : d&&d.cons ? `<div class="rkp-draft"><span class="rkbig">#${d.cons}</span><div><b>2027 NFL Draft · ${draftRound(d.cons)}</b><span>${DRAFT_AUTO?`Outside the ${DRAFT_AUTO.boardSize}-player ${DRAFT_AUTO.source}. `:""}#${d.cons} on the ${DRAFT_SRC} as of ${DRAFT_ASOF}${d.note?`. ${d.note}`:""}</span></div></div>`
+    : d ? `<div class="rkp-draft"><span class="rkbig sm">2027</span><div><b>2027 NFL Draft prospect</b><span>${d.note||(DRAFT_AUTO?`Listed on the ${DRAFT_AUTO.source} but outside its top ${DRAFT_AUTO.boardSize}.`:"")}</span></div></div>`
+    : `<div class="rkp-draft"><span class="rkbig sm">${ey}</span><div><b>${ey===2027?"Draft eligible in 2027":`Draft eligible in ${ey}`}</b><span>${ey===2027?"Not on the major 2027 big boards yet.":"Not draft eligible until "+ey+"."}</span></div></div>`;
+  const fam=rkFamily(p), plan=rkPlan(p).filter(([m])=>totVal(p,m)>0);
+  const rows=plan.map(([m,f])=>{
+    const r=(RANKS[key]||{})[m]||{}, famName=RK_FAM_NAME[f];
+    return `<div class="rkp-row"><div class="rkp-l"><b>${RK_METRICS[m].label}</b><span>${fmtNum(totVal(p,m))}</span></div>
+      <div class="rkp-c"><span class="rkp-k">UK</span>${_ord(teamRank(p,m))}</div>
+      <div class="rkp-c"><span class="rkp-k">SEC ${famName}</span>${rkState==="loading"&&!r.sec?"…":rankText(r.sec)}</div>
+      <div class="rkp-c"><span class="rkp-k">FBS ${famName}</span>${rkState==="loading"&&!r.fbs?"…":rankText(r.fbs)}</div></div>`;
+  }).join("");
+  const statsPart = rows ? rows
+    : `<p class="rkp-note">${fam==="OL"?"Offensive linemen don’t have box-score stats to rank, so their ranking comes from the draft boards.":"No 2026 stats to rank yet."}</p>`;
+  return `<div class="stitle">Rankings</div>${draft}${statsPart}
+    ${rows?`<p class="rkp-note">SEC and FBS ranks compare him with players at his position on ESPN. <button type="button" class="linkbtn" data-open-rankings>See all rankings</button></p>`:""}`;
+}
+
+/* rankings page */
+let rkTab="draft", rkPos="ALL", rkQ="";
+const rkOv=()=>document.getElementById("rkOverlay");
+function drawRankings(){
+  const ov=rkOv(); if(!ov||!ov.classList.contains("on")) return;
+  ov.querySelectorAll("[data-rktab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.rktab===rkTab));
+  ov.querySelector("#rkPosRow").hidden=rkTab!=="pos";
+  const q=norm(rkQ.trim()), match=p=>!q||norm(p[F.name]).includes(q)||String(p[F.num])===rkQ.trim();
+  const body=ov.querySelector("#rkBody");
+  const row=(p,inner)=>`<button type="button" class="rkrow" data-p="${R.indexOf(p)}"><span class="rkn"><b>${p[F.name]}</b><span>#${p[F.num]} ${p[F.pos]} · ${CLASS_FULL[p[F.cls]]||p[F.cls]}</span></span>${inner}</button>`;
+  if(rkTab==="draft"){
+    const pros=R.filter(p=>draftOf(p)&&match(p)).sort((a,b)=>draftSortKey(draftOf(a))-draftSortKey(draftOf(b)));
+    const elig=R.filter(p=>!draftOf(p)&&eligYear(p)===2027&&match(p)).length;
+    body.innerHTML=draftReminderHtml()+(pros.length?pros.map(p=>{ const d=draftOf(p), shown=d.r||d.cons;
+        const sub=d.r?draftRound(d.r):d.cons?`${draftRound(d.cons)} · consensus`:"Prospect";
+        return row(p,`<span class="rkdr"><b>${shown?"#"+shown:"—"}</b><span>${sub}</span></span>`); }).join("")
+      :`<div class="igempty">No draft prospects match.</div>`)+
+      `<p class="rkp-note">${draftSourceLine()} The round is the range that rank usually goes in. ${elig} other Wildcats are eligible for the 2027 draft but aren’t on the boards yet.</p>`;
+    return;
+  }
+  const status = rkState==="loading" ? "Loading SEC and FBS ranks from ESPN…"
+    : rkState==="failed" ? `Couldn’t load SEC and FBS ranks from ESPN. UK team ranks still work. <button type="button" class="linkbtn" data-rk-retry>Try again</button>`
+    : rkAt ? `SEC and FBS ranks from ESPN, updated ${new Date(rkAt).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"})}. <button type="button" class="linkbtn" data-rk-retry>Refresh</button>` : "";
+  const sections=[];
+  const famOrder=["QB","RB","WR","TE","DL","EDGE","LB","DB","K"];
+  famOrder.filter(f=>rkPos==="ALL"||rkPos===f||(rkPos==="DL"&&f==="EDGE")).forEach(f=>{
+    const players=R.filter(p=>rkFamily(p)===f);
+    const metrics=[...new Set(players.flatMap(p=>rkPlan(p).map(x=>x[0])))];
+    metrics.forEach(m=>{
+      const fam=(players.map(p=>rkPlan(p).find(x=>x[0]===m)).find(Boolean)||[])[1];
+      const list=players.filter(p=>totVal(p,m)>0&&match(p)).sort((a,b)=>totVal(b,m)-totVal(a,m));
+      if(!list.length) return;
+      sections.push(`<section class="rksec"><h3>${RK_METRICS[m].label} <span>${f==="EDGE"?"Edge":f}${fam==="ALL"?" · vs all players":""}</span></h3>
+        <div class="rkhead"><span>Player</span><span>Total</span><span>UK</span><span>SEC</span><span>FBS</span></div>
+        ${list.map(p=>{ const r=(RANKS[norm(p[F.name])]||{})[m]||{};
+          return row(p,`<span class="rkv">${fmtNum(totVal(p,m))}</span><span class="rkv">${_ord(teamRank(p,m))}</span><span class="rkv">${rkState==="loading"&&!r.sec?"…":rankText(r.sec)}</span><span class="rkv">${rkState==="loading"&&!r.fbs?"…":rankText(r.fbs)}</span>`); }).join("")}
+      </section>`);
+    });
+  });
+  body.innerHTML=`<p class="rkstatus">${status}</p>`+(sections.join("")||`<div class="igempty">${SEASON.length?"No players match.":"Season stats are still loading."}</div>`)+
+    `<p class="rkp-note">Each player is ranked against the same position (QBs vs QBs, WRs vs WRs). Sacks and interceptions compare against every player. A “+” means he’s outside the top players ESPN listed, so his exact rank is lower than that number. Offensive linemen are ranked on the Draft board tab.</p>`;
+}
+loadDraftAuto();
+function openRankings(tab){
+  const ov=rkOv(); if(tab) rkTab=tab;
+  ov.classList.add("on"); document.body.style.overflow="hidden";
+  drawRankings(); loadRanks();
+}
+(function(){
+  const ov=rkOv();
+  document.getElementById("rkBtn").addEventListener("click",()=>openRankings());
+  ov.querySelector("#rkClose").addEventListener("click",()=>{ ov.classList.remove("on"); document.body.style.overflow=""; });
+  ov.addEventListener("click",e=>{
+    if(e.target===ov){ ov.classList.remove("on"); document.body.style.overflow=""; return; }
+    const t=e.target.closest("[data-rktab]"); if(t){ rkTab=t.dataset.rktab; drawRankings(); return; }
+    const ps=e.target.closest("[data-rkpos]"); if(ps){ rkPos=ps.dataset.rkpos; ov.querySelectorAll("[data-rkpos]").forEach(b=>b.setAttribute("aria-pressed",b===ps)); drawRankings(); return; }
+    if(e.target.closest("[data-rk-retry]")){ loadRanks(true); return; }
+    const r=e.target.closest(".rkrow[data-p]"); if(r) openModal(+r.dataset.p);
+  });
+  ov.querySelector("#rkQ").addEventListener("input",e=>{ rkQ=e.target.value; drawRankings(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&ov.classList.contains("on")&&!document.getElementById("overlay").classList.contains("on")){ ov.classList.remove("on"); document.body.style.overflow=""; } });
+  // "See all rankings" link inside a player card
+  document.getElementById("overlay").addEventListener("click",e=>{
+    if(e.target.closest("[data-open-rankings]")){ closeModal(); openRankings("pos"); }
+  });
+})();
+
+/* ---------- Installable app: service worker + install prompt ---------- */
+(function(){
+  if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+    window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+  }
+  const bar=document.getElementById("installBar"), btn=document.getElementById("ibInstall"), sub=document.getElementById("ibSub");
+  const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+  let dismissed=false; try{ dismissed=Date.now()-(+localStorage.getItem("ukdc-install-dismissed")||0)<14*864e5; }catch(e){}
+  if(standalone||dismissed) return;
+  let deferred=null;
+  window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferred=e; bar.hidden=false; });
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+  if(ios){ sub.innerHTML="Tap <b>Share</b> then <b>Add to Home Screen</b>."; btn.hidden=true; setTimeout(()=>bar.hidden=false,1500); }
+  btn.addEventListener("click",async()=>{
+    if(!deferred) return;
+    deferred.prompt(); const r=await deferred.userChoice.catch(()=>null); deferred=null;
+    bar.hidden=true;
+  });
+  document.getElementById("ibClose").addEventListener("click",()=>{ bar.hidden=true; try{ localStorage.setItem("ukdc-install-dismissed",Date.now()); }catch(e){} });
+  window.addEventListener("appinstalled",()=>{ bar.hidden=true; });
 })();
 
 render();
