@@ -1,12 +1,23 @@
 {
   "source": "Tankathon 2027 NFL Draft Big Board",
   "sourceUrl": "https://www.tankathon.com/nfl/big-board",
-  "checked": "2026-10-18T14:45:00Z",
-  "boardSize": 164,
+  "checked": "2026-10-19T17:28:01Z",
+  "boardSize": 162,
   "players": {
-    "Lance Heard": {"rank": 55, "pos": "OT", "url": "https://www.tankathon.com/nfl/players/lance-heard"},
-    "Tavion Gadson": {"rank": 77, "pos": "DL", "url": "https://www.tankathon.com/nfl/players/tavion-gadson"},
-    "Nic Anderson": {"rank": null, "pos": "WR", "url": "https://www.tankathon.com/nfl/players/nic-anderson"},
-    "CJ Baxter": {"rank": null, "pos": "RB", "url": "https://www.tankathon.com/nfl/players/cj-baxter"}
+    "Lance Heard": {
+      "rank": 52,
+      "pos": "OT",
+      "url": "https://www.tankathon.com/nfl/players/lance-heard"
+    },
+    "Tavion Gadson": {
+      "rank": 73,
+      "pos": "DL",
+      "url": "https://www.tankathon.com/nfl/players/tavion-gadson"
+    },
+    "Coleton Price": {
+      "rank": 128,
+      "pos": "IOL",
+      "url": "https://www.tankathon.com/nfl/players/coleton-price"
+    }
   }
 }
