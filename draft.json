@@ -1,23 +1,28 @@
 {
   "source": "Tankathon 2027 NFL Draft Big Board",
   "sourceUrl": "https://www.tankathon.com/nfl/big-board",
-  "checked": "2026-11-15T17:41:40Z",
-  "boardSize": 169,
+  "checked": "2026-11-16T21:00:08Z",
+  "boardSize": 168,
   "players": {
     "Lance Heard": {
-      "rank": 34,
+      "rank": 33,
       "pos": "OT",
       "url": "https://www.tankathon.com/nfl/players/lance-heard"
     },
     "Tavion Gadson": {
-      "rank": 75,
+      "rank": 78,
       "pos": "DL",
       "url": "https://www.tankathon.com/nfl/players/tavion-gadson"
     },
     "Mi'Qui. Humphrey-Grace": {
-      "rank": 146,
+      "rank": 139,
       "pos": "EDGE",
       "url": "https://www.tankathon.com/nfl/players/mi-quise-humphrey-grace"
+    },
+    "Coleton Price": {
+      "rank": 164,
+      "pos": "IOL",
+      "url": "https://www.tankathon.com/nfl/players/coleton-price"
     }
   }
 }
